@@ -196,8 +196,8 @@ const CSS = `
   #${PANEL_ID} .mt-win{height:calc(100vh - 16px);height:calc(100dvh - 16px);border-radius:14px}
   #${PANEL_ID} .mt-head{padding:14px 16px;gap:12px;flex-wrap:wrap}
   #${PANEL_ID} .mt-brand{margin-right:auto}
-  #${PANEL_ID} .mt-tabs{order:2;width:100%}
-  #${PANEL_ID} .mt-tab{flex:1;font-size:12px;padding:8px 10px}
+  #${PANEL_ID} .mt-tabs{order:2;width:100%;min-width:0;box-sizing:border-box}
+  #${PANEL_ID} .mt-tab{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;padding:8px 4px}
   #${PANEL_ID} .mt-hero{margin:16px;padding:20px}
   #${PANEL_ID} .mt-art{display:none}
   #${PANEL_ID} .mt-hero h3{font-size:26px}
