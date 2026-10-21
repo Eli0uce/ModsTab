@@ -1,0 +1,29 @@
+name: Release
+on:
+  push:
+    tags: ["v*"]
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm ci
+      - run: npm run check
+      - run: npm test
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:ui -- --workers=1
+      - name: Construire l'archive
+        run: |
+          chmod +x Install-macOS.command
+          zip -r ModsTab.zip plugin installer Install-Windows.bat Install-macOS.command README.md LICENSE
+          zip -r ModsTab-Windows.zip plugin installer Install-Windows.bat README.md LICENSE
+          zip -r ModsTab-macOS.zip plugin installer Install-macOS.command README.md LICENSE
+          sha256sum ModsTab*.zip plugin/ModsTab.plugin.js > SHA256SUMS.txt
+      - name: Publier la release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${{ github.ref_name }}" ModsTab.zip ModsTab-Windows.zip ModsTab-macOS.zip plugin/ModsTab.plugin.js SHA256SUMS.txt --title "ModsTab ${{ github.ref_name }}" --notes-file .github/RELEASE_NOTES.md
