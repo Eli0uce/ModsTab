@@ -85,7 +85,7 @@ const CSS = `
 #${PANEL_ID} .mt-search{padding-left:40px}
 #${PANEL_ID} .mt-search::placeholder{color:var(--mt-muted)}
 #${PANEL_ID} .mt-chips{display:flex;gap:8px;flex-wrap:wrap;padding:0 28px 20px}
-#${PANEL_ID} .mt-kinds{display:flex;gap:8px;padding:0 28px 18px}
+#${PANEL_ID} .mt-kinds{display:flex;gap:8px;flex-wrap:wrap;padding:0 28px 18px}
 #${PANEL_ID} .mt-chip{border:1px solid var(--mt-border);border-radius:20px;background:transparent;color:var(--mt-muted);padding:6px 12px;font-size:12px;transition:background .15s,border-color .15s}
 #${PANEL_ID} .mt-chip:hover,#${PANEL_ID} .mt-chip[aria-pressed="true"]{color:#e6e0ff;border-color:#8073c1;background:#a087ff1c}
 #${PANEL_ID} .mt-body{padding:0 28px 28px;min-width:0}
@@ -196,8 +196,8 @@ const CSS = `
   #${PANEL_ID} .mt-win{height:calc(100vh - 16px);height:calc(100dvh - 16px);border-radius:14px}
   #${PANEL_ID} .mt-head{padding:14px 16px;gap:12px;flex-wrap:wrap}
   #${PANEL_ID} .mt-brand{margin-right:auto}
-  #${PANEL_ID} .mt-tabs{order:2;width:100%}
-  #${PANEL_ID} .mt-tab{flex:1;font-size:12px;padding:8px 10px}
+  #${PANEL_ID} .mt-tabs{order:2;width:100%;min-width:0;box-sizing:border-box}
+  #${PANEL_ID} .mt-tab{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;padding:8px 4px}
   #${PANEL_ID} .mt-hero{margin:16px;padding:20px}
   #${PANEL_ID} .mt-art{display:none}
   #${PANEL_ID} .mt-hero h3{font-size:26px}
@@ -344,6 +344,135 @@ const h = (tag, props = {}, ...kids) => {
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+const THEME_FONTS = {
+    discord: '"gg sans","Noto Sans",sans-serif',
+    system: 'system-ui,sans-serif',
+    mono: 'ui-monospace,monospace',
+};
+const THEME_COLORS = {
+    primary: "Discussion", secondary: "Salons et membres", tertiary: "Barre des serveurs",
+    surface: "Champs et menus", text: "Texte principal", muted: "Texte secondaire", accent: "Accent",
+};
+const THEME_PRESETS = {
+    nuit: { primary: "#202127", secondary: "#191a20", tertiary: "#111218", surface: "#2b2d36", text: "#f2f3fc", muted: "#b0b7d0", accent: "#a6a3ff" },
+    clair: { primary: "#ffffff", secondary: "#eef0f5", tertiary: "#dfe3ed", surface: "#e5e8f0", text: "#202333", muted: "#535c70", accent: "#5540b0" },
+    foret: { primary: "#182822", secondary: "#122019", tertiary: "#0b1711", surface: "#263c31", text: "#ecf7ef", muted: "#afc9b7", accent: "#83dbaf" },
+};
+const newThemeDraft = () => ({ name: "Mon thème", ...THEME_PRESETS.nuit, font: "discord", fontSize: 16, radius: 12, spacing: 16 });
+
+function validateThemeDraft(draft) {
+    if (!draft || typeof draft !== "object" || typeof draft.name !== "string" ||
+        !draft.name.trim() || draft.name.length > 60 || /[\r\n\u0000-\u001f\u007f]/.test(draft.name) || draft.name.includes("*/")) {
+        throw new Error("Le nom doit contenir 1 à 60 caractères, sans saut de ligne ni fin de commentaire.");
+    }
+    for (const key of Object.keys(THEME_COLORS)) {
+        if (typeof draft[key] !== "string" || !/^#[0-9a-f]{6}$/i.test(draft[key])) throw new Error(`Couleur invalide : ${THEME_COLORS[key]}.`);
+    }
+    if (!Object.hasOwn(THEME_FONTS, draft.font)) throw new Error("Police inconnue.");
+    for (const [key, min, max] of [["fontSize", 12, 22], ["radius", 0, 24], ["spacing", 4, 24]]) {
+        if (!Number.isInteger(draft[key]) || draft[key] < min || draft[key] > max) throw new Error(`Réglage invalide : ${key}.`);
+    }
+    return draft;
+}
+
+function themeCSS(draft) {
+    const d = validateThemeDraft(draft);
+    const tokens = {
+        "background-primary": d.primary, "background-secondary": d.secondary, "background-secondary-alt": d.secondary,
+        "background-tertiary": d.tertiary, "background-floating": d.surface, "background-accent": d.surface,
+        "background-base-lowest": d.tertiary, "background-base-lower": d.secondary, "background-base-low": d.primary,
+        "background-surface-high": d.surface, "background-surface-higher": d.surface,
+        "bg-base-primary": d.primary, "bg-base-secondary": d.secondary, "bg-base-tertiary": d.tertiary,
+        "bg-surface-overlay": d.surface, "bg-surface-raised": d.surface,
+        "bg-overlay-chat": `linear-gradient(${d.primary},${d.primary})`, "bg-overlay-home": `linear-gradient(${d.secondary},${d.secondary})`,
+        "chat-background-default": d.primary, "channeltextarea-background": d.surface, "input-background": d.surface,
+        "text-normal": d.text, "text-primary": d.text, "text-default": d.text, "header-primary": d.text,
+        "text-muted": d.muted, "text-secondary": d.muted, "text-tertiary": d.muted, "header-secondary": d.muted,
+        "channels-default": d.muted, "interactive-normal": d.muted, "interactive-hover": d.text, "interactive-active": d.text,
+        "icon-primary": d.text, "icon-secondary": d.muted, "icon-tertiary": d.muted,
+        "text-link": d.accent, "text-brand": d.accent, "brand-500": d.accent, "brand-560": `${d.accent}dd`, "brand-600": `${d.accent}bb`,
+        "blurple-50": d.accent, "control-brand-foreground": d.accent,
+        "button-filled-brand-background": d.accent, "button-filled-brand-background-hover": `${d.accent}dd`,
+        "button-filled-brand-background-active": `${d.accent}bb`, "button-filled-brand-text": contrastText(d.accent),
+        "button-secondary-background": d.surface, "button-secondary-text": d.text,
+        "mention-background": `${d.accent}26`, "mention-foreground": d.accent,
+        "background-mentioned": `${d.accent}18`, "background-mentioned-hover": `${d.accent}26`,
+        "background-modifier-hover": `${d.accent}14`, "background-modifier-selected": `${d.accent}26`,
+        "background-modifier-active": `${d.accent}20`, "background-modifier-accent": `${d.muted}30`,
+        "background-mod-subtle": `${d.accent}0a`, "background-mod-normal": `${d.accent}14`, "background-mod-strong": `${d.accent}26`,
+        "border-subtle": `${d.muted}26`, "border-normal": `${d.muted}40`, "border-strong": `${d.muted}66`, "chat-border": `${d.muted}40`,
+        "scrollbar-thin-thumb": d.muted, "scrollbar-thin-track": "transparent",
+        "scrollbar-auto-thumb": d.muted, "scrollbar-auto-track": d.secondary,
+        "font-primary": THEME_FONTS[d.font], "font-display": THEME_FONTS[d.font],
+        "chat-font-scaling": d.fontSize / 16,
+    };
+    return `:root,.theme-dark,.theme-light,.theme-darker,.theme-midnight{\n${Object.entries(tokens).map(([key, value]) => `  --${key}:${value}!important;`).join("\n")}\n}
+[class*="messageContent"]{font-size:${d.fontSize}px!important;line-height:1.5!important}
+[class*="cozy_"][class*="message_"]{margin-top:${d.spacing}px!important}
+[class*="channelTextArea"],[class*="panels_"],[class*="menu_"],[class*="embedFull"]{border-radius:${d.radius}px!important}
+`;
+}
+
+function contrastText(hex) {
+    const rgb = [1, 3, 5].map((index) => {
+        const value = parseInt(hex.slice(index, index + 2), 16) / 255;
+        return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+    });
+    return rgb[0] * 0.2126 + rgb[1] * 0.7152 + rgb[2] * 0.0722 > 0.179 ? "#000000" : "#ffffff";
+}
+
+const EDITOR_CSS = `
+#${PANEL_ID} .mt-editor{padding-top:24px;display:grid;gap:20px}
+#${PANEL_ID} .mt-editor-layout{display:grid;grid-template-columns:minmax(230px,1fr) minmax(0,2fr);gap:20px;align-items:start}
+#${PANEL_ID} .mt-editor-controls{display:grid;gap:14px;padding:18px;background:var(--mt-surface);border:1px solid var(--mt-border);border-radius:14px}
+#${PANEL_ID} .mt-editor-mode{display:flex;gap:8px;flex-wrap:wrap}
+#${PANEL_ID} .mt-editor-advanced{display:grid;gap:14px}
+#${PANEL_ID} .mt-editor-colors{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+#${PANEL_ID} .mt-editor input[type=color]{width:100%;height:34px;padding:2px;border:1px solid var(--mt-border);border-radius:6px;background:transparent;cursor:pointer}
+#${PANEL_ID} .mt-editor input[type=range]{width:100%;accent-color:var(--mt-accent)}
+#${PANEL_ID} .mt-editor-preview{min-width:0;position:sticky;top:16px;display:grid;gap:12px}
+#${PANEL_ID} .mt-editor-actions{display:flex;gap:12px;flex-wrap:wrap}
+#${PANEL_ID} .mt-editor-status{overflow-wrap:anywhere}
+@media(max-width:850px){#${PANEL_ID} .mt-editor-layout{grid-template-columns:minmax(0,1fr)}#${PANEL_ID} .mt-editor-preview{position:static}}
+`;
+
+function themePreview() {
+    const host = h("div", { role: "region", "aria-label": "Aperçu Discord en direct" });
+    const shadow = host.attachShadow({ mode: "open" });
+    const style = h("style");
+    shadow.append(h("style", {}, `
+        *{box-sizing:border-box} .theme-dark{display:flex;min-height:390px;border:1px solid var(--border-normal);border-radius:14px;overflow:hidden;
+        background:var(--background-primary);color:var(--text-normal);font-family:var(--font-primary);font-size:14px;line-height:1.5}
+        .servers{background:var(--background-tertiary);padding:14px 8px;display:grid;align-content:start;gap:12px}
+        .server,.avatar{display:grid;place-items:center;border-radius:50%;width:32px;height:32px;background:var(--background-surface-high);flex-shrink:0}
+        .selected,button{background:var(--brand-500);color:var(--button-filled-brand-text)}
+        .channels,.members{background:var(--background-secondary);padding:16px 12px;color:var(--channels-default)}
+        .channels{width:128px;flex-shrink:0}.members{width:100px;flex-shrink:0}.channels p{padding:6px;margin:8px 0}
+        .active{color:var(--interactive-active);background:var(--background-modifier-selected);border-radius:6px}
+        .chat{flex:1;min-width:0;display:flex;flex-direction:column}.title{padding:14px;border-bottom:1px solid var(--border-normal);color:var(--header-primary);font-weight:bold}
+        .messages{padding:0 12px 16px}.message{display:flex;gap:8px}.content{min-width:0;overflow-wrap:anywhere}.muted,small{color:var(--text-muted)}
+        .messageContent{margin:4px 0}.mention{color:var(--mention-foreground);background:var(--mention-background)}a{color:var(--text-link)}
+        .embedFull{padding:12px;background:var(--background-secondary);border-left:3px solid var(--brand-500)}
+        button{font:inherit;border:0;padding:7px 12px;cursor:default}.channelTextArea{padding:12px;margin:auto 12px 12px;background:var(--channeltextarea-background);color:var(--text-muted)}
+        @media(max-width:650px){.members{display:none}}@media(max-width:420px){.channels{display:none}}
+    `), style, h("div", { class: "theme-dark" },
+        h("aside", { class: "servers", "aria-label": "Serveurs" }, h("span", { class: "server selected" }, "M"), h("span", { class: "server" }, "A"), h("span", { class: "server" }, "B")),
+        h("aside", { class: "channels" }, h("strong", {}, "Votre univers"), h("p", { class: "active" }, "# général"), h("p", {}, "# créations"), h("p", {}, "Vocal")),
+        h("div", { class: "chat" }, h("div", { class: "title" }, "# général"),
+            h("div", { class: "messages" },
+                h("div", { class: "cozy_preview message_preview message" }, h("span", { class: "avatar" }, "A"),
+                    h("div", { class: "content" }, h("strong", {}, "Alex"), h("small", {}, " · 14:32"),
+                        h("p", { class: "messageContent" }, "Bienvenue dans votre Discord !"),
+                        h("p", { class: "messageContent" }, h("span", { class: "mention" }, "@vous"), " Un thème à votre image."))),
+                h("div", { class: "cozy_preview message_preview message" }, h("span", { class: "avatar" }, "C"),
+                    h("div", { class: "content" }, h("strong", {}, "Camille"), h("p", { class: "messageContent" }, "Tout change en direct."),
+                        h("div", { class: "embedFull" }, h("strong", {}, "Votre création"), h("p", { class: "muted" }, "Couleurs, police et détails."),
+                            h("button", { type: "button", tabindex: "-1" }, "Bouton accent"))))),
+            h("div", { class: "channelTextArea" }, "Envoyer un message dans #général")),
+        h("aside", { class: "members" }, "EN LIGNE", h("p", {}, "Alex"), h("p", {}, "Camille"))));
+    return { host, style };
+}
+
 /* ───────────── ModsTab Original : Spotify ───────────── */
 
 const SPOTIFY_ACCOUNTS = "https://accounts.spotify.com";
@@ -390,22 +519,33 @@ const SPOTIFY_CSS = `
 
 const SPOTIFY_DOCK_CSS = SPOTIFY_CSS.replaceAll(`#${PANEL_ID}`, `#${SPOTIFY_DOCK_ID}`) + `
 #${SPOTIFY_DOCK_ID}{--mt-bg:var(--background-floating,#10121b);--mt-surface:var(--background-secondary,#1b1e2d);--mt-border:var(--background-modifier-accent,#32374d);--mt-text:var(--text-normal,#f2f3fc);--mt-muted:var(--text-muted,#b0b7d0);--mt-accent:var(--text-link,#a6a3ff);
-position:fixed;right:16px;bottom:16px;z-index:1000;width:min(460px,calc(100vw - 32px));max-height:calc(100dvh - 32px);overflow:auto;box-sizing:border-box;padding:16px;border:1px solid var(--mt-border);border-radius:16px;background:var(--mt-bg);color:var(--mt-text);font:14px var(--font-primary,system-ui,sans-serif);box-shadow:0 8px 32px #0006}
+position:fixed;right:16px;bottom:16px;z-index:1000;width:min(360px,calc(100vw - 32px));max-height:calc(100dvh - 32px);overflow:auto;box-sizing:border-box;padding:12px;border:1px solid var(--mt-border);border-radius:12px;background:var(--mt-bg);color:var(--mt-text);font:13px var(--font-primary,system-ui,sans-serif);box-shadow:0 8px 32px #0006}
 #${SPOTIFY_DOCK_ID} *{box-sizing:border-box}
 #${SPOTIFY_DOCK_ID} [hidden]{display:none!important}
 #${SPOTIFY_DOCK_ID} :is(button,input):focus-visible{outline:2px solid var(--mt-accent);outline-offset:3px}
 #${SPOTIFY_DOCK_ID} .mt-sp-dock-head{display:flex;align-items:center;gap:8px}
 #${SPOTIFY_DOCK_ID} .mt-sp-dock-head strong{margin-right:auto}
-#${SPOTIFY_DOCK_ID} .mt-sp-dock-body{display:flex;flex-direction:column;gap:14px;margin-top:14px}
+#${SPOTIFY_DOCK_ID} .mt-sp-dock-body{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+#${SPOTIFY_DOCK_ID} .mt-sp-now{flex-wrap:nowrap;gap:10px}
+#${SPOTIFY_DOCK_ID} .mt-sp-meta{flex:1;min-width:0}
+#${SPOTIFY_DOCK_ID} .mt-sp-title{font-size:14px}
+#${SPOTIFY_DOCK_ID} .mt-sp-sub{font-size:11px}
+#${SPOTIFY_DOCK_ID} .mt-sp-bar{margin-top:4px}
+#${SPOTIFY_DOCK_ID} .mt-sp-controls{gap:6px}
+#${SPOTIFY_DOCK_ID} .mt-sp-ico{width:32px;height:32px}
+#${SPOTIFY_DOCK_ID} .mt-sp-volume{height:24px;font-size:11px}
+#${SPOTIFY_DOCK_ID} .mt-sp-volume input{width:80px}
+#${SPOTIFY_DOCK_ID} :is(.mt-sp-error,.mt-sp-list):empty{display:none}
 #${SPOTIFY_DOCK_ID} .mt-badge{font-size:11px;color:var(--mt-muted)}
-#${SPOTIFY_DOCK_ID} .mt-btn{padding:8px 10px;border:1px solid var(--mt-border);border-radius:8px;background:var(--mt-surface);color:var(--mt-text);cursor:pointer}
+#${SPOTIFY_DOCK_ID} .mt-btn{padding:6px 8px;border:1px solid var(--mt-border);border-radius:8px;background:var(--mt-surface);color:var(--mt-text);font:inherit;cursor:pointer}
 #${SPOTIFY_DOCK_ID} .mt-search{width:100%;min-width:0;padding:8px;border:1px solid var(--mt-border);border-radius:8px;background:var(--mt-surface);color:var(--mt-text)}
-#${SPOTIFY_DOCK_ID} .mt-sp-search{flex-wrap:wrap}
+#${SPOTIFY_DOCK_ID} .mt-sp-search{flex-wrap:wrap;gap:6px}
+#${SPOTIFY_DOCK_ID} .mt-sp-search .mt-btn{font-size:12px}
 #${SPOTIFY_DOCK_ID} .mt-sp-search .mt-search{flex-basis:100%}
-#${SPOTIFY_DOCK_ID} .mt-sp-cover{width:64px;height:64px}
+#${SPOTIFY_DOCK_ID} .mt-sp-cover{width:44px;height:44px;border-radius:8px}
 #${SPOTIFY_DOCK_ID} .mt-sp-row{flex-wrap:wrap}
 #${SPOTIFY_DOCK_ID} .mt-icon{width:18px;height:18px}
-#${SPOTIFY_DOCK_ID}[data-collapsed="true"]{width:240px}
+#${SPOTIFY_DOCK_ID}[data-collapsed="true"]{width:min(220px,calc(100vw - 32px))}
 `;
 
 class SpotifyError extends Error {
@@ -472,6 +612,9 @@ class SpotifyOriginal {
             this.error = `Réglages Spotify illisibles : ${err.message}`;
         }
         this.timer = setInterval(() => this.onTick(), 1000);
+        this.onResize = () => this.positionDock();
+        window.addEventListener("resize", this.onResize);
+        this.panelObserver = new ResizeObserver(() => this.positionDock());
         this.paint();
         if (this.enabled && this.tokens) this.loadProfile().then(() => this.refreshPlayback());
     }
@@ -479,6 +622,9 @@ class SpotifyOriginal {
     stop() {
         this.stopped = true;
         clearInterval(this.timer);
+        window.removeEventListener("resize", this.onResize);
+        this.panelObserver?.disconnect();
+        this.anchorPanel = null;
         this.authServer?.close();
         this.authServer = null;
         this.root?.remove();
@@ -809,7 +955,7 @@ class SpotifyOriginal {
         const body = !this.enabled
             ? [h("p", { class: "mt-muted" }, "Contrôlez Spotify sans quitter Discord : lecture, file d’attente, recherche et partage. Les fonctions s’adaptent automatiquement à votre abonnement (Premium ou gratuit). Désactivé par défaut.")]
             : this.connected ? [
-                h("p", { class: "mt-muted" }, "Le lecteur Spotify est accessible directement en bas à droite de Discord, même lorsque ModsTab est fermé."),
+                h("p", { class: "mt-muted" }, "Le lecteur Spotify est accessible juste au-dessus du panneau utilisateur de Discord, même lorsque ModsTab est fermé."),
                 h("div", {}, h("button", { class: "mt-btn", onclick: () => {
                     this.setCollapsed(false);
                     this.ui.play.focus();
@@ -824,6 +970,8 @@ class SpotifyOriginal {
         if (!this.enabled || !this.connected) {
             this.dock?.remove();
             this.dock = null;
+            this.panelObserver?.disconnect();
+            this.anchorPanel = null;
             this.ui = {};
             return;
         }
@@ -847,6 +995,7 @@ class SpotifyOriginal {
             this.setCollapsed(Boolean(this.collapsed));
         }
         if (!this.dock.isConnected) document.body.append(this.dock);
+        this.positionDock();
         this.updatePlan();
         this.update();
     }
@@ -859,6 +1008,29 @@ class SpotifyOriginal {
         this.collapseButton.textContent = collapsed ? "Ouvrir" : "Réduire";
         this.collapseButton.setAttribute("aria-expanded", String(!collapsed));
         this.collapseButton.setAttribute("aria-label", collapsed ? "Ouvrir le lecteur Spotify" : "Réduire le lecteur Spotify");
+        this.positionDock();
+    }
+
+    positionDock() {
+        if (!this.dock?.isConnected) return;
+        const panel = Array.from(document.querySelectorAll('[class*="panels_"]'))
+            .find((el) => el.getBoundingClientRect().width > 0 && el.getBoundingClientRect().height > 0);
+        if (panel !== this.anchorPanel) {
+            this.panelObserver?.disconnect();
+            this.anchorPanel = panel;
+            if (panel) this.panelObserver?.observe(panel);
+        }
+        if (!panel) {
+            Object.assign(this.dock.style, { left: "", right: "", bottom: "", maxHeight: "" });
+            return;
+        }
+        const bounds = panel.getBoundingClientRect();
+        const bottom = Math.max(16, Math.min(window.innerHeight - bounds.top + 8, window.innerHeight - 64));
+        const left = Math.max(16, Math.min(bounds.left, window.innerWidth - this.dock.offsetWidth - 16));
+        Object.assign(this.dock.style, {
+            left: `${left}px`, right: "auto", bottom: `${bottom}px`,
+            maxHeight: `${window.innerHeight - bottom - 16}px`,
+        });
     }
 
     setupView() {
@@ -1094,7 +1266,7 @@ class SpotifyOriginal {
 module.exports = class ModsTab {
     constructor(meta) {
         this.meta = meta;
-        this.view = "catalog"; // "installed" | "catalog" | "originals"
+        this.view = "catalog"; // "installed" | "catalog" | "originals" | "create"
         this.query = "";
         this.kind = "plugin";
         this.category = "all";
@@ -1107,12 +1279,21 @@ module.exports = class ModsTab {
         this.busy = new Set();
         this._raf = 0;
         this.graphiteEnabled = false;
+        this.themeDraft = newThemeDraft();
+        this.themeEditorMode = "basic";
+        this.themeExporting = false;
         this.spotify = new SpotifyOriginal(this);
     }
 
     /* ───────────── cycle de vie ───────────── */
 
     start() {
+        try {
+            const saved = BdApi.Data.load("ModsTab", "themeDraft");
+            if (saved != null) this.themeDraft = { ...validateThemeDraft(saved) };
+        } catch (err) {
+            this.toast(`Impossible de charger le brouillon du thème : ${err.message}`, "error");
+        }
         this.graphiteEnabled = false;
         try {
             this.graphiteEnabled = BdApi.Data.load("ModsTab", "graphiteEnabled") === true;
@@ -1138,8 +1319,8 @@ module.exports = class ModsTab {
     }
 
     addStyle() {
-        if (window.BdApi?.DOM?.addStyle) BdApi.DOM.addStyle(STYLE_ID, CSS + GRAPHITE_CSS + SPOTIFY_CSS + SPOTIFY_DOCK_CSS);
-        else document.head.append(h("style", { id: STYLE_ID }, CSS + GRAPHITE_CSS + SPOTIFY_CSS + SPOTIFY_DOCK_CSS));
+        if (window.BdApi?.DOM?.addStyle) BdApi.DOM.addStyle(STYLE_ID, CSS + GRAPHITE_CSS + SPOTIFY_CSS + SPOTIFY_DOCK_CSS + EDITOR_CSS);
+        else document.head.append(h("style", { id: STYLE_ID }, CSS + GRAPHITE_CSS + SPOTIFY_CSS + SPOTIFY_DOCK_CSS + EDITOR_CSS));
     }
 
     removeStyle() {
@@ -1201,6 +1382,7 @@ module.exports = class ModsTab {
         this._raf = requestAnimationFrame(() => {
             this._raf = 0;
             this.syncTab();
+            this.spotify.positionDock();
         });
     }
 
@@ -1330,12 +1512,19 @@ module.exports = class ModsTab {
             "aria-controls": "modstab-panel-content",
             onclick: () => this.setView("originals"),
         }, "Originals");
-        this.tabs = [this.tabCatalog, this.tabInstalled, this.tabOriginals];
+        this.tabCreate = h("button", {
+            id: "modstab-tab-create", class: "mt-tab", role: "tab", "aria-controls": "modstab-panel-content",
+            onclick: () => this.setView("create"),
+        }, "Créer");
+        this.tabs = [this.tabCatalog, this.tabInstalled, this.tabOriginals, this.tabCreate];
         this.kindButtons = ["plugin", "theme"].map((kind) => h("button", {
             class: "mt-chip", "aria-pressed": String(this.kind === kind),
             onclick: () => this.setKind(kind),
         }, kind === "theme" ? "Thèmes" : "Plugins"));
-        this.kindControls = h("div", { class: "mt-kinds", role: "group", "aria-label": "Type de création" }, ...this.kindButtons);
+        this.folderButton = h("button", {
+            class: "mt-btn mt-btn-secondary", type: "button", onclick: () => this.openAddonFolder(this.kind),
+        });
+        this.kindControls = h("div", { class: "mt-kinds", role: "group", "aria-label": "Type de création" }, ...this.kindButtons, this.folderButton);
         this.categorySelect = h("select", {
             class: "mt-select",
             "aria-label": "Catégorie",
@@ -1422,7 +1611,7 @@ module.exports = class ModsTab {
                 e.preventDefault();
                 const next = e.key === "Home" ? 0 : e.key === "End" ? tabs.length - 1
                     : (index + (e.key === "ArrowRight" ? 1 : tabs.length - 1)) % tabs.length;
-                this.setView(["catalog", "installed", "originals"][next]);
+                this.setView(["catalog", "installed", "originals", "create"][next]);
                 tabs[next].focus();
                 return;
             }
@@ -1442,7 +1631,7 @@ module.exports = class ModsTab {
         document.addEventListener("keydown", this._onKey);
 
         this.render();
-        (this.view === "originals" ? this.tabOriginals : this.searchInput).focus();
+        (["originals", "create"].includes(this.view) ? this.tabs.find((tab) => tab.id === `modstab-tab-${this.view}`) : this.searchInput).focus();
         if (this.catalogState === "idle" || this.catalogState === "error") this.loadCatalog();
     }
 
@@ -1495,6 +1684,18 @@ module.exports = class ModsTab {
         throw new Error("type de création inconnu");
     }
 
+    async openAddonFolder(type) {
+        const label = type === "theme" ? "thèmes" : "plugins";
+        try {
+            const folder = this.manager(type).folder;
+            if (typeof folder !== "string" || !folder.trim()) throw new Error("Dossier BetterDiscord indisponible.");
+            const error = await require("electron").shell.openPath(folder);
+            if (error) throw new Error(error);
+        } catch (err) {
+            this.toast(`Impossible d’ouvrir le dossier des ${label} : ${err.message}`, "error");
+        }
+    }
+
     resetFilters() {
         this.query = "";
         this.category = "all";
@@ -1518,10 +1719,12 @@ module.exports = class ModsTab {
         this.tabInstalled.replaceChildren("Ma bibliothèque", h("span", { class: "mt-count" }, installed.length));
         const catalogView = this.view === "catalog";
         const originalsView = this.view === "originals";
+        const createView = this.view === "create";
         this.hero.hidden = !catalogView || Boolean(this.detail);
-        this.kindControls.hidden = originalsView || Boolean(this.detail);
+        this.kindControls.hidden = originalsView || createView || Boolean(this.detail);
         this.kindButtons.forEach((button, index) => button.setAttribute("aria-pressed", String(this.kind === (index === 0 ? "plugin" : "theme"))));
-        this.toolbar.hidden = originalsView || Boolean(this.detail);
+        this.folderButton.textContent = `Ouvrir le dossier des ${this.kindLabel}`;
+        this.toolbar.hidden = originalsView || createView || Boolean(this.detail);
         this.chips.hidden = !catalogView || Boolean(this.detail) || this.catalogState !== "ready";
         this.categoryField.hidden = !catalogView;
         this.sortField.hidden = !catalogView;
@@ -1540,7 +1743,7 @@ module.exports = class ModsTab {
                 onclick: () => this.setCategory(tag),
             }, tag === "all" ? "Tout explorer" : this.tagLabel(tag))));
         this.body.setAttribute("aria-labelledby", `modstab-tab-${this.view}`);
-        const rows = originalsView ? this.renderOriginals() : this.detail ? [this.renderDetail(this.detail)] : this.view === "installed" ? this.renderInstalled() : this.renderCatalog();
+        const rows = createView ? [this.renderThemeEditor()] : originalsView ? this.renderOriginals() : this.detail ? [this.renderDetail(this.detail)] : this.view === "installed" ? this.renderInstalled() : this.renderCatalog();
         this.body.replaceChildren(...rows);
         if (focusKey) {
             const target = [...this.root.querySelectorAll("[data-focus-key]")].find((node) => node.getAttribute("data-focus-key") === focusKey);
@@ -1561,6 +1764,140 @@ module.exports = class ModsTab {
             h("section", { "aria-labelledby": "modstab-originals-plugins" },
                 h("div", { class: "mt-section-head" }, h("h3", { id: "modstab-originals-plugins" }, "Plugins")),
                 this.spotify.render()))];
+    }
+
+    saveThemeDraft() {
+        try {
+            BdApi.Data.save("ModsTab", "themeDraft", { ...validateThemeDraft(this.themeDraft) });
+        } catch (err) {
+            this.toast(`Brouillon non enregistré : ${err.message}`, "error");
+        }
+    }
+
+    renderThemeEditor() {
+        this.resultsStatus.textContent = "Créateur de thème avec aperçu Discord en direct.";
+        const preview = themePreview();
+        const status = h("p", { class: "mt-muted mt-editor-status", role: "status", "aria-live": "polite" });
+        const exportButton = h("button", {
+            class: "mt-btn", type: "submit", disabled: this.themeExporting,
+        }, icon("download"), this.themeExporting ? "Export en cours…" : "Exporter vers ModsTab");
+        const update = () => {
+            try {
+                preview.style.textContent = themeCSS(this.themeDraft);
+                status.textContent = "";
+                exportButton.disabled = this.themeExporting;
+            } catch (err) {
+                status.textContent = err.message;
+                exportButton.disabled = true;
+            }
+        };
+        const field = (key, label, props = {}) => {
+            const input = h("input", {
+                ...props, value: this.themeDraft[key], "aria-label": label,
+                oninput: (e) => {
+                    this.themeDraft[key] = props.type === "range" ? Number(e.target.value) : e.target.value;
+                    if (output) output.value = `${e.target.value} px`;
+                    update();
+                },
+                onchange: () => this.saveThemeDraft(),
+            });
+            const output = props.type === "range" ? h("output", {}, `${this.themeDraft[key]} px`) : null;
+            return h("label", { class: "mt-field" }, label, input, output);
+        };
+        const preset = h("select", {
+            class: "mt-select", "aria-label": "Palette de départ",
+            onchange: (e) => {
+                if (!Object.hasOwn(THEME_PRESETS, e.target.value)) return;
+                Object.assign(this.themeDraft, THEME_PRESETS[e.target.value]);
+                this.saveThemeDraft();
+                this.render();
+                this.body.querySelector('[aria-label="Palette de départ"]').focus();
+            },
+        }, h("option", { value: "" }, "Choisir une palette…"),
+        ...[["nuit", "Nuit violette"], ["clair", "Clair"], ["foret", "Forêt"]].map(([value, label]) => h("option", { value }, label)));
+        const font = h("select", {
+            class: "mt-select", "aria-label": "Police",
+            onchange: (e) => { this.themeDraft.font = e.target.value; update(); this.saveThemeDraft(); },
+        }, ...[["discord", "Discord"], ["system", "Système"], ["mono", "Monospace"]].map(([value, label]) => h("option", { value }, label)));
+        font.value = this.themeDraft.font;
+        const advanced = h("div", {
+            id: "modstab-editor-advanced", class: "mt-editor-advanced", hidden: this.themeEditorMode !== "advanced",
+        },
+        h("div", { class: "mt-editor-colors" }, ...Object.entries(THEME_COLORS)
+            .filter(([key]) => key !== "primary" && key !== "accent")
+            .map(([key, label]) => field(key, label, { type: "color" }))),
+        field("spacing", "Espacement des messages", { type: "range", min: "4", max: "24", step: "1" }));
+        const modeButtons = [["basic", "Basique"], ["advanced", "Avancé"]].map(([mode, label]) => h("button", {
+            type: "button", class: "mt-chip", "aria-pressed": String(this.themeEditorMode === mode),
+            "aria-controls": "modstab-editor-advanced",
+            onclick: (event) => {
+                this.themeEditorMode = mode;
+                advanced.hidden = mode !== "advanced";
+                modeButtons.forEach((button) => button.setAttribute("aria-pressed", String(button === event.currentTarget)));
+            },
+        }, label));
+        update();
+        return h("form", {
+            class: "mt-editor",
+            onsubmit: async (e) => {
+                e.preventDefault();
+                if (this.themeExporting) return;
+                this.themeExporting = true;
+                exportButton.disabled = true;
+                exportButton.textContent = "Export en cours…";
+                try {
+                    const file = this.writeCreatedTheme();
+                    status.textContent = `${file} exporté. Activez-le dans Ma bibliothèque → Thèmes une fois chargé par BetterDiscord.`;
+                    this.toast("Thème exporté dans votre bibliothèque. Il reste désactivé.", "success");
+                } catch (err) {
+                    status.textContent = `Échec de l’export : ${err.message}`;
+                    this.toast(status.textContent, "error");
+                } finally {
+                    this.themeExporting = false;
+                    exportButton.disabled = false;
+                    exportButton.textContent = "Exporter vers ModsTab";
+                }
+            },
+        },
+        h("div", {}, h("h3", {}, "Créez votre thème Discord"), h("p", { class: "mt-muted" }, "Aucun CSS à écrire. Votre brouillon est enregistré sur cet appareil.")),
+        h("div", { class: "mt-editor-mode", role: "group", "aria-label": "Mode du créateur" }, ...modeButtons),
+        h("div", { class: "mt-editor-layout" },
+            h("div", { class: "mt-editor-controls" },
+                field("name", "Nom du thème", { type: "text", class: "mt-select", maxlength: "60", required: true }),
+                h("label", { class: "mt-field" }, "Palette de départ", preset),
+                h("div", { class: "mt-editor-colors" }, ...["primary", "accent"].map((key) => field(key, THEME_COLORS[key], { type: "color" }))),
+                h("label", { class: "mt-field" }, "Police", font),
+                field("fontSize", "Taille du texte", { type: "range", min: "12", max: "22", step: "1" }),
+                field("radius", "Arrondis", { type: "range", min: "0", max: "24", step: "1" }),
+                advanced),
+            h("div", { class: "mt-editor-preview" }, h("strong", {}, "Aperçu en direct"), preview.host,
+                h("p", { class: "mt-muted" }, "Simulation de Discord. Les avatars, médias, rôles et statuts conservent leurs couleurs. Le rendu réel peut varier selon la version de Discord et les autres thèmes actifs."),
+                h("div", { class: "mt-editor-actions" }, exportButton,
+                    h("button", {
+                        class: "mt-btn mt-btn-secondary", type: "button",
+                        onclick: () => { this.kind = "theme"; this.query = ""; this.searchInput.value = ""; this.setView("installed"); },
+                    }, "Voir mes thèmes")),
+                status)));
+    }
+
+    writeCreatedTheme() {
+        const draft = validateThemeDraft(this.themeDraft);
+        if (this.manager("theme").getAll().some((theme) => theme.name === draft.name.trim())) {
+            throw new Error("Un thème porte déjà ce nom. Choisissez un autre nom pour préserver l’original.");
+        }
+        const fs = require("fs");
+        const path = require("path");
+        const id = require("crypto").createHash("sha256").update(draft.name.trim()).digest("hex").slice(0, 12);
+        const slug = draft.name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9_-]/gi, "-").slice(0, 60);
+        const file = `ModsTab-${slug}-${id}.theme.css`;
+        const code = `/**\n * @name ${draft.name.trim()}\n * @author ModsTab Creator\n * @version 1.0.0\n * @description Créé avec l’éditeur visuel ModsTab.\n */\n\n${themeCSS(draft)}`;
+        try {
+            fs.writeFileSync(path.join(this.manager("theme").folder, file), code, { encoding: "utf8", flag: "wx" });
+        } catch (err) {
+            if (err.code === "EEXIST") throw new Error("Ce thème a déjà été exporté. Choisissez un autre nom pour créer une variante.");
+            throw err;
+        }
+        return file;
     }
 
     matches(...fields) {
@@ -1942,3 +2279,4 @@ module.exports = class ModsTab {
 };
 
 module.exports.Spotify = { SpotifyOriginal, spotifyPlan, spotifyCapabilities };
+module.exports.ThemeCreator = { newThemeDraft, validateThemeDraft, themeCSS };

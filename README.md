@@ -33,6 +33,7 @@ ModsTab ajoute **Mods** sous **Quêtes** dans Discord.
 | **Découvrir** | Parcourir le catalogue officiel BetterDiscord, rechercher des plugins et thèmes, filtrer, trier et consulter leurs fiches. |
 | **Ma bibliothèque** | Retrouver vos créations installées et les activer ou désactiver sans quitter Discord. |
 | **Originals** | Activer les créations intégrées à ModsTab : **Graphite** et **Spotify**. |
+| **Créer** | Composer un thème Discord sans CSS, avec aperçu en direct, puis l’exporter dans votre bibliothèque. |
 
 Le catalogue est paginé sans limite artificielle de résultats. Les installations demandent confirmation, téléchargent le fichier dans le dossier approprié et tentent de l’activer. Le panneau est responsive, accessible au clavier et respecte la réduction des animations du système.
 
@@ -40,19 +41,19 @@ Le catalogue est paginé sans limite artificielle de résultats. Les installatio
 
 ### Windows
 
-1. [Téléchargez l’archive Windows](https://github.com/Eli0uce/ModsTab/releases/latest/download/ModsTab-Windows.zip).
-2. **Extrayez tous les fichiers**, puis lancez `Install-Windows.bat`.
+1. [Téléchargez l’installeur Windows signé](https://github.com/Eli0uce/ModsTab/releases/latest/download/ModsTab-Setup.exe).
+2. Lancez `ModsTab-Setup.exe` et suivez les instructions affichées.
 3. Dans Discord, ouvrez **Paramètres utilisateur → Plugins** et activez **ModsTab**.
 
 ### macOS
 
-1. [Téléchargez l’archive macOS](https://github.com/Eli0uce/ModsTab/releases/latest/download/ModsTab-macOS.zip).
-2. **Décompressez toute l’archive**, puis ouvrez `Install-macOS.command`.
+1. [Téléchargez l’app macOS signée et notariée](https://github.com/Eli0uce/ModsTab/releases/latest/download/ModsTab-macOS.dmg).
+2. Ouvrez l’image disque et lancez `ModsTab.app` ; Terminal affiche le déroulement de l’installation.
 3. Dans Discord, ouvrez **Paramètres utilisateur → Plugins** et activez **ModsTab**.
 
-**Prérequis :** Discord de bureau, [Node.js](https://nodejs.org/) et BetterDiscord. Si Node.js manque, le lanceur Windows propose winget ; sur macOS, il utilise Homebrew s’il est disponible, sinon indique comment installer Node.js. Si BetterDiscord manque, l’installeur tente de l’installer avec son CLI : **Discord peut être fermé et relancé**.
+**Prérequis :** Discord de bureau, [Node.js](https://nodejs.org/) et BetterDiscord. Si Node.js manque, le lanceur Windows propose winget ; sur macOS, il utilise Homebrew s’il est disponible, sinon indique comment installer Node.js. Si BetterDiscord manque, l’installeur tente de l’installer avec son CLI : **Discord peut être fermé et relancé**. Des archives ZIP avec les lanceurs historiques restent disponibles dans les assets de la release.
 
-Les lanceurs ne sont pas signés/notariés. Sur macOS, si le système bloque le fichier, consultez **Réglages Système → Confidentialité et sécurité** et n’autorisez son ouverture qu’après avoir vérifié sa provenance. Vous pouvez aussi exécuter `bash Install-macOS.command` dans le dossier extrait.
+Les lanceurs natifs `.exe` et `.app` sont signés ; l’app macOS est également notariée. Le plugin `.js` et les scripts distribués dans les archives ZIP restent des fichiers source/script et ne sont pas des exécutables signés.
 
 ### BetterDiscord est déjà installé ?
 
@@ -65,6 +66,16 @@ Téléchargez seulement [ModsTab.plugin.js](https://github.com/Eli0uce/ModsTab/r
 
 Activez ensuite ModsTab dans **Paramètres → Plugins**. Pour PTB ou Canary, lancez l’installeur avec `--channel=ptb` ou `--channel=canary`.
 
+Dans **Découvrir** ou **Ma bibliothèque**, le bouton **Ouvrir le dossier des plugins/thèmes** ouvre le dossier BetterDiscord correspondant au type sélectionné dans l’Explorateur Windows ou le Finder.
+
+## Créer un thème sans CSS
+
+Ouvrez **Mods → Créer**. Le mode **Basique**, affiché par défaut, propose les palettes (Nuit violette, Clair ou Forêt), les couleurs de discussion et d’accent, la police locale, la taille du texte et les arrondis. Passez en **Avancé** pour régler aussi les couleurs des salons, serveurs, champs et textes ainsi que l’espacement des messages. Les deux modes partagent le même brouillon : changer de mode ne réinitialise aucun réglage. L’aperçu réagit immédiatement, sans modifier votre Discord ; le brouillon est enregistré localement.
+
+**Exporter vers ModsTab** génère un fichier `.theme.css` autonome directement dans le dossier des thèmes BetterDiscord, sans téléchargement ni ressource distante. Retrouvez-le dans **Ma bibliothèque → Thèmes** après son chargement par BetterDiscord, puis activez-le. L’export ne l’active pas automatiquement et refuse un nom déjà installé ou exporté pour préserver les thèmes existants. Pour une nouvelle variante, choisissez un autre nom.
+
+L’aperçu est une simulation : le rendu réel dépend de la version de Discord et des thèmes actifs (y compris Graphite). Désactivez les thèmes concurrents en cas de conflit. Les médias, avatars, rôles et couleurs de statut ne sont pas recolorés.
+
 ## Les ModsTab Originals
 
 ### Graphite — moins de bruit, plus de Discord
@@ -75,7 +86,7 @@ Activez-le dans **Originals → Thèmes**. Il est désactivé par défaut, fonct
 
 ### Spotify — votre musique, là où vous discutez
 
-Une fois activé et connecté, le lecteur reste **en bas à droite de Discord**, même lorsque ModsTab est fermé. Réduisez-le avec **Réduire** ou **Échap**, puis retrouvez-le avec **Ouvrir**. Il revient au démarrage tant que Spotify reste activé et connecté.
+Une fois activé et connecté, le lecteur reste **juste au-dessus du panneau utilisateur de Discord**, même lorsque ModsTab est fermé. Il suit la taille et la position du panneau sans recouvrir ses commandes ; si ce panneau est absent, il se place en bas à droite. Réduisez-le avec **Réduire** ou **Échap**, puis retrouvez-le avec **Ouvrir**. Il revient au démarrage tant que Spotify reste activé et connecté.
 
 | Fonction | Disponibilité |
 |---|---|
@@ -106,7 +117,7 @@ Aucun client secret n’est demandé : l’authentification utilise **OAuth PKCE
 
 ## Développer
 
-Le plugin distribué est un fichier autonome, sans dépendance à embarquer. **Node.js 20+** est recommandé pour le développement et les tests navigateur.
+Le plugin distribué est un fichier autonome, sans dépendance à embarquer. **Node.js 20+** et **Go 1.22+** sont requis pour le développement et les tests.
 
 ```bash
 git clone https://github.com/Eli0uce/ModsTab.git
@@ -115,12 +126,14 @@ npm ci
 npx playwright install chromium
 npm run check
 npm test
+go test ./...
+go vet ./...
 npm run test:ui -- --workers=1
 ```
 
 `plugin/ModsTab.plugin.js` contient le plugin ; `installer/install.js` gère l’installation. `tests/catalog.test.js` couvre la logique du catalogue et les restrictions Spotify ; `tests/ui/` couvre les parcours, le lecteur principal, les erreurs et les petits écrans.
 
-Pour publier : vérifiez les tests, mettez à jour les versions et les notes dans `.github/RELEASE_NOTES.md`, puis poussez un nouveau tag `vX.Y.Z`. Le workflow de release vérifie le projet et produit les archives Windows/macOS, le plugin seul et leurs empreintes SHA-256. Ne remplacez pas un tag déjà publié.
+Pour publier : vérifiez les tests, mettez à jour les versions et les notes dans `.github/RELEASE_NOTES.md`, puis poussez un nouveau tag `vX.Y.Z`. Le workflow signe l’installeur Windows avec Authenticode et signe/notarise l’app macOS. Configurez les secrets Actions `WINDOWS_SIGNING_CERTIFICATE_BASE64`, `WINDOWS_SIGNING_CERTIFICATE_PASSWORD`, `APPLE_CERTIFICATE_BASE64`, `APPLE_CERTIFICATE_PASSWORD`, `APPLE_ID`, `APPLE_APP_SPECIFIC_PASSWORD` et `APPLE_TEAM_ID` avant de pousser le tag. Il publie aussi les archives ZIP, le plugin seul et les empreintes SHA-256. Ne remplacez pas un tag déjà publié.
 
 ## Contribuer
 

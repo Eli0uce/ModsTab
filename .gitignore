@@ -5,3 +5,6 @@ test-results/
 playwright-report/
 .idea/
 dist/
+ModsTab.app/
+ModsTab-Setup.exe
+ModsTab-macOS.dmg

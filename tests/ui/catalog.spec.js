@@ -108,6 +108,27 @@ test("Spotify affiche les erreurs réseau dans le lecteur principal", async ({ p
     await expect(page.getByRole("region", { name: "Lecteur Spotify", exact: true }).getByRole("alert")).toContainText("Service Spotify indisponible");
 });
 
+for (const width of [360, 1280]) {
+    test(`lecteur Spotify compact à ${width}px avec toutes ses commandes`, async ({ page }) => {
+        await page.setViewportSize({ width, height: 900 });
+        await openCatalog(page);
+        await startSpotify(page);
+        const dock = page.getByRole("region", { name: "Lecteur Spotify", exact: true });
+        const bounds = await dock.boundingBox();
+        expect(bounds.width).toBeLessThanOrEqual(360);
+        expect(bounds.height).toBeLessThanOrEqual(300);
+        expect(await dock.evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(true);
+        await expect(dock.getByRole("slider", { name: "Volume", exact: true })).toBeVisible();
+        await expect(dock.getByRole("slider", { name: "Position dans le titre" })).toBeVisible();
+        await expect(dock.getByRole("searchbox", { name: "Rechercher un titre" })).toBeVisible();
+        await expect(dock.getByRole("button", { name: "File d’attente", exact: true })).toBeVisible();
+        await dock.getByRole("button", { name: "Titre suivant", exact: true }).click();
+        await expect.poll(() => page.evaluate(() => window.spotifyCalls.some((c) => c.url.endsWith("/me/player/next")))).toBe(true);
+        await dock.getByRole("button", { name: "Réduire le lecteur Spotify" }).click();
+        expect((await dock.boundingBox()).width).toBeLessThanOrEqual(220);
+    });
+}
+
 test("le lecteur Spotify ne déborde pas sur une petite fenêtre", async ({ page }) => {
     await page.setViewportSize({ width: 360, height: 640 });
     await openCatalog(page);
@@ -120,6 +141,47 @@ test("le lecteur Spotify ne déborde pas sur une petite fenêtre", async ({ page
     expect(bounds.y + bounds.height).toBeLessThanOrEqual(640);
     expect(await dock.evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(true);
 });
+
+for (const width of [360, 1280]) {
+    test(`Spotify reste au-dessus du panneau utilisateur à ${width}px`, async ({ page }) => {
+        await page.setViewportSize({ width, height: 640 });
+        await openCatalog(page);
+        await startSpotify(page);
+        const dock = page.getByRole("region", { name: "Lecteur Spotify", exact: true });
+        await page.evaluate(() => {
+            const panel = document.createElement("section");
+            panel.className = "panels_test";
+            panel.style.cssText = "position:fixed;left:10px;bottom:10px;width:320px;height:116px;background:#202127";
+            document.body.append(panel);
+        });
+        const panel = page.locator(".panels_test");
+        const assertAbovePanel = async () => {
+            await expect.poll(async () => {
+                const player = await dock.boundingBox();
+                const anchor = await panel.boundingBox();
+                return Math.round(anchor.y - player.y - player.height);
+            }).toBe(8);
+            const bounds = await dock.boundingBox();
+            expect(bounds.x).toBe(16);
+            expect(bounds.y).toBeGreaterThanOrEqual(16);
+            expect(bounds.x + bounds.width).toBeLessThanOrEqual(width - 16);
+        };
+        await assertAbovePanel();
+        await panel.evaluate((el) => { el.style.height = "180px"; });
+        await assertAbovePanel();
+        await dock.getByRole("button", { name: "Réduire le lecteur Spotify" }).click();
+        await assertAbovePanel();
+        await panel.evaluate((el) => { el.replaceWith(el.cloneNode()); });
+        await panel.evaluate((el) => { el.style.height = "80px"; });
+        await dock.getByRole("button", { name: "Ouvrir le lecteur Spotify" }).click();
+        await assertAbovePanel();
+        await page.setViewportSize({ width, height: 700 });
+        await assertAbovePanel();
+        await panel.evaluate((el) => el.remove());
+        await expect(dock).toHaveCSS("right", "16px");
+        await expect(dock).toHaveCSS("bottom", "16px");
+    });
+}
 
 async function openCatalog(page, { mode = "ready", data = addons } = {}) {
     await page.route("https://betterdiscord.app/image/**", (route) => {
@@ -203,6 +265,50 @@ async function openCatalog(page, { mode = "ready", data = addons } = {}) {
     if (mode === "ready" && plugins.length) await expect(page.locator(".mt-card:not(.mt-skeleton)")).toHaveCount(Math.min(18, plugins.length));
 }
 
+test("les dossiers plugins et thèmes s’ouvrent depuis le catalogue et la bibliothèque vide", async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 640 });
+    await openCatalog(page);
+    await page.evaluate(() => {
+        window.openedFolders = [];
+        window.BdApi.Plugins.folder = "/BetterDiscord/plugins";
+        window.BdApi.Themes.folder = "/BetterDiscord/themes";
+        window.require = (name) => {
+            if (name !== "electron") throw new Error(`Module inconnu : ${name}`);
+            return { shell: { openPath: async (folder) => { window.openedFolders.push(folder); return ""; } } };
+        };
+    });
+    await page.getByRole("button", { name: "Ouvrir le dossier des plugins", exact: true }).click();
+    await page.getByRole("button", { name: "Thèmes", exact: true }).click();
+    await page.getByRole("button", { name: "Ouvrir le dossier des thèmes", exact: true }).click();
+    await page.getByRole("tab", { name: /Ma bibliothèque/ }).click();
+    await expect(page.locator(".mt-card")).toHaveCount(0);
+    await page.getByRole("button", { name: "Ouvrir le dossier des thèmes", exact: true }).click();
+    expect(await page.evaluate(() => window.openedFolders)).toEqual([
+        "/BetterDiscord/plugins", "/BetterDiscord/themes", "/BetterDiscord/themes",
+    ]);
+    expect(await page.locator(".mt-scroll").evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(true);
+});
+
+test("une erreur d’ouverture du dossier est signalée", async ({ page }) => {
+    await openCatalog(page);
+    const button = page.getByRole("button", { name: "Ouvrir le dossier des plugins", exact: true });
+    await button.click();
+    expect(await page.evaluate(() => window.toasts.at(-1))).toMatchObject({
+        type: "error", message: expect.stringContaining("Dossier BetterDiscord indisponible"),
+    });
+    await page.evaluate(() => {
+        window.BdApi.Plugins.folder = "/BetterDiscord/plugins";
+        window.require = () => ({ shell: { openPath: async () => "Accès refusé" } });
+    });
+    await button.click();
+    expect(await page.evaluate(() => window.toasts.at(-1).message)).toContain("Accès refusé");
+    await page.evaluate(() => {
+        window.require = () => ({ shell: { openPath: async () => { throw new Error("Explorateur indisponible"); } } });
+    });
+    await button.click();
+    expect(await page.evaluate(() => window.toasts.at(-1).message)).toContain("Explorateur indisponible");
+});
+
 test("recherche, catégories, tri et remise à zéro", async ({ page }) => {
     await openCatalog(page);
     const search = page.getByRole("searchbox");
@@ -242,14 +348,142 @@ test("Originals sépare les créations intégrées du catalogue et de la bibliot
     await page.getByRole("button", { name: "Ouvrir l’onglet Mods" }).click();
     await expect(originals).toBeFocused();
     await page.keyboard.press("ArrowRight");
+    await expect(page.getByRole("tab", { name: "Créer", exact: true })).toBeFocused();
+    await page.keyboard.press("ArrowRight");
     await expect(page.getByRole("tab", { name: "Découvrir" })).toBeFocused();
     await expect(page.getByRole("button", { name: "Thèmes", exact: true })).toHaveAttribute("aria-pressed", "true");
     await page.keyboard.press("End");
+    await expect(page.getByRole("tab", { name: "Créer", exact: true })).toBeFocused();
+    await page.keyboard.press("ArrowLeft");
     await expect(originals).toBeFocused();
     await page.keyboard.press("ArrowLeft");
     await expect(page.getByRole("tab", { name: "Ma bibliothèque" })).toBeFocused();
     await page.keyboard.press("Home");
     await expect(page.getByRole("tab", { name: "Découvrir" })).toBeFocused();
+});
+
+test("créateur : aperçu isolé, brouillon persistant et export dans la bibliothèque", async ({ page }) => {
+    await openCatalog(page);
+    await page.getByRole("tab", { name: "Créer", exact: true }).click();
+    await expect(page.getByRole("searchbox")).toBeHidden();
+    const preview = page.getByRole("region", { name: "Aperçu Discord en direct" });
+    await expect(preview.locator(".theme-dark")).toHaveCSS("background-color", "rgb(32, 33, 39)");
+    await page.getByLabel("Discussion", { exact: true }).fill("#123456");
+    await expect(preview.locator(".theme-dark")).toHaveCSS("background-color", "rgb(18, 52, 86)");
+    await page.getByLabel("Nom du thème", { exact: true }).fill("Mon univers");
+    await page.getByLabel("Police", { exact: true }).selectOption("mono");
+    await page.getByLabel("Taille du texte", { exact: true }).fill("22");
+    await expect(preview.locator(".messageContent").first()).toHaveCSS("font-size", "22px");
+    await expect(page.getByLabel("Taille du texte", { exact: true })).toBeFocused();
+    await page.getByRole("button", { name: "Avancé", exact: true }).click();
+    await page.getByLabel("Salons et membres", { exact: true }).fill("#234567");
+    await page.getByLabel("Espacement des messages", { exact: true }).fill("24");
+    await page.getByRole("button", { name: "Basique", exact: true }).click();
+    expect(await page.locator("html").evaluate((el) => el.style.getPropertyValue("--background-primary"))).toBe("");
+    await page.getByRole("button", { name: "Fermer", exact: true }).click();
+    await page.evaluate(() => { window.plugin.stop(); window.plugin = new window.module.exports({ name: "ModsTab" }); window.plugin.start(); });
+    await page.getByRole("button", { name: "Ouvrir l’onglet Mods" }).click();
+    await page.getByRole("tab", { name: "Créer", exact: true }).click();
+    await expect(page.getByLabel("Nom du thème", { exact: true })).toHaveValue("Mon univers");
+    await expect(page.getByLabel("Discussion", { exact: true })).toHaveValue("#123456");
+    await expect(page.getByLabel("Salons et membres", { exact: true })).toBeHidden();
+    await page.getByRole("button", { name: "Avancé", exact: true }).click();
+    await expect(page.getByLabel("Salons et membres", { exact: true })).toHaveValue("#234567");
+    await expect(page.getByLabel("Espacement des messages", { exact: true })).toHaveValue("24");
+    await page.getByRole("button", { name: "Basique", exact: true }).click();
+    await page.evaluate(() => {
+        window.exports = [];
+        window.require = (name) => {
+            if (name === "crypto") return { createHash: () => ({ update: () => ({ digest: () => "123456abcdef" }) }) };
+            if (name === "path") return { join: (...parts) => parts.join("/") };
+            if (name === "fs") return { writeFileSync: (file, code, options) => {
+                window.exports.push({ file, code, options });
+                window.installedThemes.push({ id: "created-theme", name: code.match(/@name (.+)/)[1], author: "ModsTab Creator" });
+            } };
+            throw new Error(`Module inconnu : ${name}`);
+        };
+        window.BdApi.Themes.folder = "/themes";
+    });
+    await page.getByRole("button", { name: "Exporter vers ModsTab" }).click();
+    await expect(page.locator(".mt-editor-status")).toContainText("exporté");
+    const exported = await page.evaluate(() => window.exports);
+    expect(exported).toHaveLength(1);
+    expect(exported[0].code).toContain("--background-primary:#123456!important");
+    expect(exported[0].code).toContain("--background-secondary:#234567!important");
+    expect(exported[0].options.flag).toBe("wx");
+    await page.getByRole("button", { name: "Voir mes thèmes" }).click();
+    await expect(page.locator(".mt-card")).toContainText("Mon univers");
+    await expect(page.getByRole("switch", { name: "Activer Mon univers" })).not.toBeChecked();
+    await page.getByRole("switch", { name: "Activer Mon univers" }).check();
+});
+
+test("créateur : validation, erreurs d’export et sauvegarde visibles", async ({ page }) => {
+    await openCatalog(page);
+    await page.getByRole("tab", { name: "Créer", exact: true }).click();
+    await page.getByLabel("Nom du thème", { exact: true }).fill("*/");
+    await expect(page.getByRole("button", { name: "Exporter vers ModsTab" })).toBeDisabled();
+    await expect(page.locator(".mt-editor-status")).toContainText("Le nom");
+    await page.getByLabel("Nom du thème", { exact: true }).fill("Valide");
+    await page.evaluate(() => {
+        window.saveError = true;
+        window.require = () => { throw new Error("Accès au disque refusé"); };
+    });
+    await page.getByLabel("Police", { exact: true }).selectOption("system");
+    expect(await page.evaluate(() => window.toasts.at(-1).message)).toContain("Brouillon non enregistré");
+    await page.getByRole("button", { name: "Exporter vers ModsTab" }).click();
+    await expect(page.locator(".mt-editor-status")).toContainText("Échec de l’export : Accès au disque refusé");
+    await expect(page.getByRole("button", { name: "Exporter vers ModsTab" })).toBeEnabled();
+});
+
+test("créateur : modes Basique et Avancé avec brouillon commun et validation conservée", async ({ page }) => {
+    await openCatalog(page);
+    await page.getByRole("tab", { name: "Créer", exact: true }).click();
+    const basic = page.getByRole("button", { name: "Basique", exact: true });
+    const advanced = page.getByRole("button", { name: "Avancé", exact: true });
+    const secondary = page.getByLabel("Salons et membres", { exact: true });
+    const spacing = page.getByLabel("Espacement des messages", { exact: true });
+    await expect(basic).toHaveAttribute("aria-pressed", "true");
+    await expect(secondary).toBeHidden();
+    await expect(spacing).toBeHidden();
+    await page.getByLabel("Accent", { exact: true }).fill("#abcdef");
+    await advanced.focus();
+    await page.keyboard.press("Enter");
+    await expect(advanced).toHaveAttribute("aria-pressed", "true");
+    await expect(advanced).toBeFocused();
+    await secondary.fill("#123456");
+    await spacing.fill("24");
+    await page.getByLabel("Nom du thème", { exact: true }).fill("*/");
+    await basic.click();
+    await expect(secondary).toBeHidden();
+    await expect(page.getByRole("button", { name: "Exporter vers ModsTab" })).toBeDisabled();
+    await expect(page.locator(".mt-editor-status")).toContainText("Le nom");
+    await advanced.click();
+    await expect(secondary).toHaveValue("#123456");
+    await expect(spacing).toHaveValue("24");
+    await expect(page.getByLabel("Accent", { exact: true })).toHaveValue("#abcdef");
+    await page.getByLabel("Nom du thème", { exact: true }).fill("Commun");
+    await page.getByRole("tab", { name: "Découvrir", exact: true }).click();
+    await page.getByRole("tab", { name: "Créer", exact: true }).click();
+    await expect(advanced).toHaveAttribute("aria-pressed", "true");
+    await expect(secondary).toHaveValue("#123456");
+    await page.getByLabel("Palette de départ", { exact: true }).selectOption("clair");
+    await expect(advanced).toHaveAttribute("aria-pressed", "true");
+    await expect(secondary).toHaveValue("#eef0f5");
+    await expect(spacing).toHaveValue("24");
+    expect(await page.evaluate(() => window.savedSettings.themeDraft.spacing)).toBe(24);
+});
+
+test("créateur : palette claire et petite fenêtre sans débordement", async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 640 });
+    await openCatalog(page);
+    await page.getByRole("tab", { name: "Créer", exact: true }).click();
+    await page.getByLabel("Palette de départ", { exact: true }).selectOption("clair");
+    await expect(page.getByRole("region", { name: "Aperçu Discord en direct" }).locator(".theme-dark")).toHaveCSS("background-color", "rgb(255, 255, 255)");
+    expect(await page.locator(".mt-scroll").evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(true);
+    expect(await page.locator(".mt-tabs").evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(true);
+    await page.getByRole("button", { name: "Avancé", exact: true }).click();
+    await expect(page.getByLabel("Espacement des messages", { exact: true })).toBeVisible();
+    expect(await page.locator(".mt-scroll").evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(true);
 });
 
 test("Originals reste utilisable pendant le chargement du catalogue", async ({ page }) => {
