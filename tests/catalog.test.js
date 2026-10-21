@@ -213,7 +213,46 @@ async function spotifyTest() {
     console.log("Spotify : détection de l’abonnement et restrictions des contrôles OK.");
 }
 
-main().then(spotifyTest).catch((error) => {
+function themeCreatorTest() {
+    const { newThemeDraft, validateThemeDraft, themeCSS } = ModsTab.ThemeCreator;
+    const draft = newThemeDraft();
+    assert.notEqual(draft, newThemeDraft());
+    assert.match(themeCSS(draft), /--background-primary:#202127!important/);
+    assert.match(themeCSS(draft), /--button-filled-brand-text:#000000!important/);
+    assert.match(themeCSS({ ...draft, accent: "#000000" }), /--button-filled-brand-text:#ffffff!important/);
+    assert.match(themeCSS({ ...draft, fontSize: 22, radius: 0, spacing: 4 }), /font-size:22px!important/);
+    assert.match(themeCSS({ ...draft, fontSize: 12, radius: 24, spacing: 24 }), /border-radius:24px!important/);
+    for (const changes of [
+        { name: "" }, { name: "x".repeat(61) }, { name: "Test\n * @import url(x)" }, { name: "*/body{}" },
+        { accent: "red;}" }, { font: "__proto__" }, { fontSize: 23 }, { radius: -1 }, { spacing: 4.5 },
+    ]) assert.throws(() => validateThemeDraft({ ...draft, ...changes }));
+    const folder = fs.mkdtempSync(path.join(os.tmpdir(), "modstab-creator-"));
+    const previousApi = global.BdApi;
+    try {
+        const themes = [];
+        global.BdApi = { Themes: { folder, getAll: () => themes } };
+        const plugin = new ModsTab({ name: "ModsTab" });
+        plugin.themeDraft = { ...draft, name: "../../Création" };
+        const file = plugin.writeCreatedTheme();
+        assert.equal(path.basename(file), file);
+        assert.match(file, /^ModsTab-.*\.theme\.css$/);
+        const code = fs.readFileSync(path.join(folder, file), "utf8");
+        assert.match(code, /@name \.\.\/\.\.\/Création/);
+        assert.ok(code.endsWith(themeCSS(plugin.themeDraft)));
+        themes.push({ name: plugin.themeDraft.name });
+        assert.throws(() => plugin.writeCreatedTheme(), /déjà ce nom/);
+        assert.deepEqual(fs.readdirSync(folder), [file]);
+        themes.length = 0;
+        assert.throws(() => plugin.writeCreatedTheme(), /déjà été exporté/);
+        global.BdApi.Themes.folder = path.join(folder, "absent");
+        assert.throws(() => plugin.writeCreatedTheme(), /ENOENT/);
+    } finally {
+        global.BdApi = previousApi;
+        fs.rmSync(folder, { recursive: true });
+    }
+}
+
+main().then(spotifyTest).then(themeCreatorTest).catch((error) => {
     console.error(error);
     process.exitCode = 1;
 });

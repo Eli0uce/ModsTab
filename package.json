@@ -1,10 +1,12 @@
 {
   "name": "modstab",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "description": "Onglet Mods pour Discord (BetterDiscord) : parcourir, installer et activer des plugins et thèmes depuis le client.",
   "license": "MIT",
-  "engines": { "node": ">=16" },
+  "engines": {
+    "node": ">=16"
+  },
   "scripts": {
     "install-mod": "node installer/install.js",
     "check": "node --check plugin/ModsTab.plugin.js && node --check installer/install.js",
