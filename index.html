@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111014">
+  <meta name="description" content="Votre Discord, votre univers. Découvrez ModsTab : catalogue BetterDiscord, thème Graphite et lecteur Spotify intégré. Gratuit et open source, pour Windows et macOS.">
+  <meta property="og:title" content="ModsTab — Votre Discord. Votre univers.">
+  <meta property="og:description" content="Des plugins, des thèmes et un peu plus de vous. Une nouvelle façon de personnaliser Discord, gratuite et open source.">
+  <meta property="og:type" content="website">
+  <title>ModsTab — Votre Discord. Votre univers.</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <a class="skip" href="#main">Aller au contenu</a>
+  <svg class="sprite" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <symbol id="i-mark" viewBox="0 0 24 24"><path d="M4 5h6v5h4V5h6v15h-6v-5h-4v5H4z"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"/></symbol>
+    <symbol id="i-windows" viewBox="0 0 24 24"><path d="m3 5 8-1v7H3zm10-1 8-1v8h-8zM3 13h8v7l-8-1zm10 0h8v8l-8-1z"/></symbol>
+    <symbol id="i-apple" viewBox="0 0 24 24"><path d="M15 3c-2 0-3 2-3 3 2 0 3-1 3-3ZM17 12c0-2 1-3 2-4-1-2-3-2-4-2l-3 1-3-1C3 6 3 13 6 18c1 2 2 3 3 3l3-1 3 1c2 0 4-3 5-5-2-1-3-2-3-4Z"/></symbol>
+    <symbol id="i-github" viewBox="0 0 24 24"><path d="M9 19c-4 1-4-2-5-2m10 5v-4c0-1 0-2-1-2 4 0 7-2 7-6 0-2 0-3-1-4 0-1 0-2-1-3-2 0-3 1-4 1-2-1-4-1-6 0-1 0-2-1-4-1-1 1-1 2-1 3-1 1-1 2-1 4 0 4 3 6 7 6-1 0-1 1-1 2v4"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24"><path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5Z"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10" cy="10" r="6"/><path d="m15 15 6 6"/></symbol>
+    <symbol id="i-music" viewBox="0 0 24 24"><path d="M9 18V5l11-2v13M9 8l11-2"/><ellipse cx="6" cy="18" rx="3" ry="2"/><ellipse cx="17" cy="16" rx="3" ry="2"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="m8 5 11 7-11 7Z"/></symbol>
+    <symbol id="i-next" viewBox="0 0 24 24"><path d="m5 5 10 7-10 7ZM19 5v14"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24"><path d="M20 5c-3-3-6-1-8 1-2-2-5-4-8-1s-1 6 1 8l7 7 7-7c2-2 4-5 1-8Z"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></symbol>
+  </svg>
+
+  <header class="header">
+    <a class="brand" href="#" aria-label="ModsTab, accueil"><span class="brand-mark"><svg><use href="#i-mark"/></svg></span>ModsTab<span class="version">BETA</span></a>
+    <nav aria-label="Navigation principale">
+      <a href="#features">L’expérience</a><a href="#originals">Originals<span class="nav-dot"></span></a><a href="#installation">Installation</a>
+    </nav>
+    <a class="nav-cta" href="#download">Télécharger <svg class="icon"><use href="#i-download"/></svg></a>
+  </header>
+
+  <main id="main">
+    <section class="hero wrap">
+      <div class="hero-glow" aria-hidden="true"></div>
+      <a class="announcement" href="https://github.com/Eli0uce/ModsTab/releases/tag/v0.1.0"><span class="live-dot"></span> ModsTab v0.1.0 est là <span class="announcement-line"></span> Découvrez la première release <svg class="icon"><use href="#i-arrow"/></svg></a>
+      <p class="eyebrow hero-eyebrow"><span class="tiny-mark">✳</span> Moins de limites. Plus de vous.</p>
+      <h1>Votre Discord.<br><span class="gradient-text">Votre univers.</span><span class="hero-asterisk" aria-hidden="true">✳</span></h1>
+      <p class="hero-copy">Les plugins que vous aimez. Le thème qui vous ressemble.<br class="desktop"> Votre musique, toujours à portée de main.<br>Tout commence par un nouvel onglet.</p>
+      <div class="hero-actions"><a class="button primary" href="#download">Faites comme chez vous <svg class="icon"><use href="#i-arrow"/></svg></a><a class="button text-button" href="https://github.com/Eli0uce/ModsTab"><svg class="icon"><use href="#i-github"/></svg> Explorer le code</a></div>
+      <div class="hero-meta"><span><svg class="icon"><use href="#i-check"/></svg> 100 % gratuit</span><span><svg class="icon"><use href="#i-globe"/></svg> Open source</span><span>Windows & macOS</span></div>
+
+      <div class="preview-stage reveal">
+        <div class="preview-caption"><span class="live-dot"></span> Un nouvel espace dans votre quotidien <span>APERÇU INTERACTIF</span></div>
+        <div class="app-preview" id="demo">
+          <div class="window-bar"><span class="window-dots"><i></i><i></i><i></i></span><span>Votre Discord, avec un petit quelque chose en plus.</span><svg class="icon"><use href="#i-mark"/></svg></div>
+          <div class="app-layout">
+            <aside class="server-rail" aria-hidden="true"><span class="server-home">✦</span><i></i><span class="server active">m.</span><span class="server">K</span><span class="server server-art">✳</span><span class="server add">+</span></aside>
+            <aside class="channel-list"><p>VOTRE ESPACE</p><span><b>♧</b> Amis</span><span><b>◇</b> Nitro</span><span><b>⌘</b> Quêtes</span><span class="selected"><svg class="icon"><use href="#i-mark"/></svg> Mods <small>NOUVEAU</small></span><p class="messages-label">MESSAGES PRIVÉS <b>+</b></p><div class="fake-person"><i class="avatar lavender">L</i><span>Luna<small>En train de créer</small></span></div><div class="fake-person"><i class="avatar orange">N</i><span>Noah<small>Ne pas déranger</small></span></div><div class="fake-person"><i class="avatar mint">A</i><span>Alex<small>À l’écoute</small></span></div><div class="user-area"><i class="avatar lavender">V</i><span>Vous<small><i></i> En ligne</small></span><b>⚙</b></div></aside>
+            <div class="demo-content">
+              <div class="demo-top"><span class="demo-brand"><svg class="icon"><use href="#i-mark"/></svg> ModsTab</span><span class="demo-tabs" role="tablist" aria-label="Aperçu de ModsTab"><button id="demo-tab-discover" role="tab" aria-selected="true" aria-controls="demo-panel" data-demo="discover">Découvrir</button><button id="demo-tab-library" role="tab" aria-selected="false" aria-controls="demo-panel" tabindex="-1" data-demo="library">Ma bibliothèque</button><button id="demo-tab-originals" role="tab" aria-selected="false" aria-controls="demo-panel" tabindex="-1" data-demo="originals">Originals <i></i></button></span></div>
+              <div id="demo-panel" role="tabpanel" aria-labelledby="demo-tab-discover">
+                <div class="demo-banner"><div><p>LE TERRAIN DE JEU DE VOTRE DISCORD</p><h2>Un peu plus <em>vous.</em></h2><span>Les petites touches qui changent tout.</span></div><div class="banner-art" aria-hidden="true"><svg><use href="#i-mark"/></svg></div></div>
+                <div class="demo-filter"><span><svg class="icon"><use href="#i-search"/></svg> Votre prochaine découverte…</span><b>Plugins & thèmes</b></div>
+                <div class="demo-cards" id="demo-cards">
+                  <article class="demo-card"><div class="card-art art-folders"><span>▰</span><span>▰</span><span>▰</span></div><div class="card-info"><span class="card-type">ORGANISATION</span><h3>Un peu d’ordre.</h3><p>Un espace à votre image.</p><span class="card-bottom">Plugin <b>↗</b></span></div></article>
+                  <article class="demo-card"><div class="card-art art-graphite"><div class="mini-window"><i></i><span></span><span></span><span></span></div></div><div class="card-info"><span class="card-type">APPARENCE</span><h3>Graphite</h3><p>Discord au calme, même la nuit.</p><span class="card-bottom">Original inclus <b>✳</b></span></div></article>
+                  <article class="demo-card"><div class="card-art art-sound"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="card-info"><span class="card-type">MUSIQUE</span><h3>Dans votre bulle.</h3><p>Votre bande-son, sans détour.</p><span class="card-bottom">Spotify Original <b>♪</b></span></div></article>
+                </div>
+                <div class="demo-originals" id="demo-originals" hidden><span class="original-label">MODSTAB ORIGINALS</span><h3>Inclus. Pas en option.</h3><p>Graphite et Spotify vous attendent déjà. Activez-les quand vous voulez.</p><a href="#originals">Rencontrer les Originals <svg class="icon"><use href="#i-arrow"/></svg></a></div>
+                <p class="demo-footnote">Illustration de l’interface · Essayez les onglets ci-dessus</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="floating-tag"><span class="tag-icon"><svg class="icon"><use href="#i-spark"/></svg></span><span>Pas juste un plugin.<small>Votre nouveau point de départ.</small></span></div>
+      </div>
+    </section>
+
+    <div class="trust-strip"><div class="wrap"><span>Pensé pour votre quotidien.</span><span><svg class="icon"><use href="#i-mark"/></svg> BetterDiscord</span><span><svg class="icon"><use href="#i-windows"/></svg> Windows</span><span><svg class="icon"><use href="#i-apple"/></svg> macOS</span><span><svg class="icon"><use href="#i-github"/></svg> Licence MIT</span></div></div>
+
+    <section class="section wrap" id="features">
+      <div class="section-intro reveal"><p class="eyebrow">01 / UN ESPACE, TOUT VOTRE MONDE</p><h2>Personnaliser, oui.<br>Se compliquer la vie, <span class="muted-word">non.</span></h2><p>Plus besoin de jongler entre les onglets et les dossiers.<br>Découvrez, installez et activez. Sans quitter la conversation.</p></div>
+      <div class="bento">
+        <article class="feature-card feature-wide reveal"><div><span class="feature-icon"><svg class="icon"><use href="#i-search"/></svg></span><h3>Votre prochaine<br>bonne découverte.</h3><p>Le catalogue officiel BetterDiscord, au même endroit. Plugins, thèmes, filtres et recherche : trouvez ce qu’il vous faut, à votre rythme.</p><span class="micro-label">UN CATALOGUE. TOUTES LES POSSIBILITÉS.</span></div><div class="orbit-art" aria-hidden="true"><div class="orbit o1"></div><div class="orbit o2"></div><div class="orbit-center"><svg><use href="#i-mark"/></svg></div><span class="orbit-node n1">♪</span><span class="orbit-node n2">✳</span><span class="orbit-node n3">▰</span><span class="orbit-node n4">⌘</span></div></article>
+        <article class="feature-card reveal"><span class="feature-icon"><svg class="icon"><use href="#i-check"/></svg></span><h3>Un clic.<br>Et c’est chez vous.</h3><p>Consultez la fiche, confirmez l’installation, puis activez votre création depuis votre bibliothèque.</p><div class="install-visual" aria-hidden="true"><span class="install-symbol">✳</span><span>Votre nouveau favori<small>Prêt à être activé</small></span><i>✓</i></div></article>
+        <article class="feature-card reveal"><span class="feature-icon"><svg class="icon"><use href="#i-github"/></svg></span><h3>Rien à cacher.<br>Tout à explorer.</h3><p>Pas de compte ModsTab. Pas de paiement. Du code ouvert, une licence MIT et la liberté de regarder sous le capot.</p><a class="inline-link" href="https://github.com/Eli0uce/ModsTab">C’est sur GitHub <svg class="icon"><use href="#i-arrow"/></svg></a></article>
+        <article class="feature-card feature-wide library-feature reveal"><div><span class="feature-icon"><svg class="icon"><use href="#i-spark"/></svg></span><h3>Votre collection.<br>Vos règles.</h3><p>Retrouvez vos plugins et thèmes installés. Activez ce qui vous plaît, désactivez le reste. Votre Discord, pas celui du voisin.</p></div><div class="library-visual" aria-hidden="true"><div><span class="library-square">G</span><span>Graphite<small>La nuit, en mieux.</small></span><i class="visual-switch on"></i></div><div><span class="library-square green">♪</span><span>Spotify<small>Le bon morceau, au bon moment.</small></span><i class="visual-switch on"></i></div><div><span class="library-square grey">✳</span><span>Votre prochain favori<small>À vous de choisir.</small></span><i class="visual-switch"></i></div></div></article>
+      </div>
+    </section>
+
+    <section class="section originals-section" id="originals">
+      <div class="wrap">
+        <div class="originals-heading reveal"><div><p class="eyebrow">02 / FAITS MAISON, POUR VOUS</p><h2>Les petits plus.<br><span class="gradient-text">Déjà inclus.</span></h2></div><p>On les appelle les Originals.<br>Des créations signées ModsTab,<br>à activer quand l’envie vous prend.</p><span class="originals-stamp" aria-hidden="true">✳</span></div>
+        <article class="original-card graphite-card reveal">
+          <div class="original-copy"><span class="original-label">ORIGINAL 001 <span>THÈME</span></span><h3>Graphite<span>.</span></h3><p class="original-subtitle">Baissez le bruit.<br>Pas la lumière de vos idées.</p><p>Des noirs doux. Des gris justes. Une interface qui s’efface pour laisser la place à ce qui compte. Vos images, vos rôles et vos souvenirs gardent leurs couleurs.</p><span class="original-pill">Sans filtre global. Sans compromis sur vos médias.</span></div>
+          <div class="graphite-visual" id="graphite-demo"><div class="theme-window"><div class="theme-sidebar"><b>Le coin tranquille</b><span># général</span><span class="chosen"># inspiration</span><span># après-minuit</span><small>VOCAL</small><span>◖ le salon</span></div><div class="theme-chat"><div class="theme-chat-title"># inspiration <span>un peu moins de bruit.</span></div><div class="chat-message"><i class="avatar lavender">L</i><div><b>Luna <small>23:48</small></b><p>Et si on gardait juste l’essentiel ?</p><div class="landscape"><div class="landscape-sun"></div><div class="landscape-hill"></div></div></div></div><div class="chat-message"><i class="avatar orange">N</i><div><b>Noah <small>23:49</small></b><p>Ça fait du bien, ce calme. ✨</p></div></div><div class="chat-input">Envoyer un message dans #inspiration</div></div></div><button class="theme-toggle" id="theme-toggle" aria-pressed="true"><i class="visual-switch on"></i> Graphite activé <span>Essayez</span></button></div>
+        </article>
+        <article class="original-card spotify-card reveal">
+          <div class="original-copy"><span class="original-label">ORIGINAL 002 <span>PLUGIN</span></span><h3>Le bon rythme<span>.</span></h3><p class="original-subtitle">Votre musique.<br>Dans la conversation.</p><p>Lecture, recherche, favoris et file d’attente, directement dans Discord. Un lecteur discret qui reste avec vous, même quand ModsTab est fermé.</p><span class="original-pill green-pill">Des contrôles adaptés à votre abonnement Spotify.</span></div>
+          <div class="spotify-visual"><div class="vinyl-glow"></div><div class="vinyl"><div class="vinyl-center">m.</div></div><div class="music-player"><div class="player-top"><span><i class="live-dot"></i> SPOTIFY ORIGINAL</span><span>↗</span></div><div class="player-track"><div class="album-art">after<br><i>hours.</i></div><div><b>Un peu ailleurs</b><span>Votre prochaine découverte</span><small>Une illustration, pas un extrait audio.</small></div><svg class="icon"><use href="#i-heart"/></svg></div><div class="player-progress"><span></span></div><div class="player-time"><span id="demo-time">1:24</span><span>3:42</span></div><div class="player-controls"><span>⤨</span><svg class="icon reverse"><use href="#i-next"/></svg><button id="demo-play" aria-label="Lancer l’animation du lecteur" aria-pressed="false"><svg class="icon"><use href="#i-play"/></svg></button><svg class="icon"><use href="#i-next"/></svg><span>↻</span></div></div><p class="spotify-note">Aperçu animé · Aucun audio n’est diffusé</p></div>
+        </article>
+        <p class="original-disclaimer">Spotify nécessite votre propre application développeur et une autorisation de connexion. Premium est requis pour les commandes de lecture ; les restrictions API de Spotify s’appliquent. <a href="https://github.com/Eli0uce/ModsTab#spotify--votre-musique-là-où-vous-discutez">Tout savoir sur la configuration ↗</a></p>
+      </div>
+    </section>
+
+    <section class="section wrap" id="installation">
+      <div class="section-intro reveal"><p class="eyebrow">03 / LE PLUS DUR, C’EST DE CHOISIR</p><h2>On vous fait<br><span class="muted-word">une petite place ?</span></h2><p>Discord de bureau, Windows ou macOS.<br>Quelques étapes, et vous êtes chez vous.</p></div>
+      <div class="steps"><article class="step reveal"><span class="step-number">01</span><h3>Prenez votre version.</h3><p>Téléchargez l’archive pour votre système et extrayez <strong>tous les fichiers</strong>. C’est gratuit, et ça le restera pour cette version.</p></article><article class="step reveal"><span class="step-number">02</span><h3>Lancez l’installation.</h3><p>Ouvrez <code>Install-Windows.bat</code> ou <code>Install-macOS.command</code>. L’installeur vous guide et tente d’ajouter BetterDiscord s’il manque.</p></article><article class="step reveal"><span class="step-number">03</span><h3>Faites comme chez vous.</h3><p>Dans Discord, allez dans <strong>Paramètres → Plugins</strong> et activez ModsTab. Votre nouvel onglet vous attend sous Quêtes.</p></article></div>
+      <div class="install-note"><svg class="icon"><use href="#i-spark"/></svg><p><strong>Un petit détail avant de commencer.</strong> Node.js est requis ; les lanceurs vous aident à l’installer si besoin. BetterDiscord peut fermer et relancer Discord. Les scripts ne sont pas signés : vérifiez leur provenance avant de les autoriser. <a href="https://github.com/Eli0uce/ModsTab#installer-en-quelques-étapes">Le guide complet ↗</a></p></div>
+    </section>
+
+    <section class="download-section wrap reveal" id="download"><div class="download-glow" aria-hidden="true"></div><span class="download-mark" aria-hidden="true"><svg><use href="#i-mark"/></svg></span><p class="eyebrow">C’EST VOTRE TOUR.</p><h2>Un Discord<br>un peu plus <em>vous.</em></h2><p>Aucun abonnement ModsTab. Aucun compte à créer.<br>Juste de nouvelles possibilités.</p><div class="downloads"><a class="button download-button" href="https://github.com/Eli0uce/ModsTab/releases/latest/download/ModsTab-Windows.zip"><svg class="icon filled"><use href="#i-windows"/></svg><span>Télécharger pour Windows<small>Archive ZIP · Lanceur .bat inclus</small></span><svg class="icon"><use href="#i-download"/></svg></a><a class="button download-button mac-button" href="https://github.com/Eli0uce/ModsTab/releases/latest/download/ModsTab-macOS.zip"><svg class="icon filled"><use href="#i-apple"/></svg><span>Télécharger pour macOS<small>Archive ZIP · Lanceur .command inclus</small></span><svg class="icon"><use href="#i-download"/></svg></a></div><span class="download-meta">v0.1.0 · Gratuit & open source · BetterDiscord requis</span><a class="manual-link" href="https://github.com/Eli0uce/ModsTab/releases/latest/download/ModsTab.plugin.js">Déjà sur BetterDiscord ? Le plugin seul ↗</a></section>
+
+    <section class="faq-section wrap section"><div class="faq-title"><p class="eyebrow">LES DERNIERS DÉTAILS</p><h2>Bien de savoir.</h2><p>La transparence, ça fait aussi<br>partie de l’expérience.</p></div><div class="faq-list"><details><summary>C’est vraiment gratuit ?<span>+</span></summary><p>Oui. ModsTab et ses Originals sont distribués gratuitement sous licence MIT. Spotify reste un service tiers : certaines commandes exigent un abonnement Premium, payé auprès de Spotify, pas auprès de ModsTab.</p></details><details><summary>Est-ce autorisé par Discord ?<span>+</span></summary><p>Les modifications du client ne sont pas autorisées par les conditions d’utilisation de Discord. ModsTab n’est pas un produit officiel. Utilisez BetterDiscord et ses plugins en connaissance de cause, à vos risques.</p></details><details><summary>Ça marche avec Vencord ou sur mobile ?<span>+</span></summary><p>Non. ModsTab est conçu pour BetterDiscord sur l’application Discord de bureau. Les archives proposées ciblent Windows et macOS, pas le navigateur, Vencord ou le mobile.</p></details><details><summary>Comment fonctionne la connexion Spotify ?<span>+</span></summary><p>Vous créez votre propre application Spotify, puis autorisez ModsTab avec OAuth PKCE. Aucun client secret n’est demandé. Vos jetons restent dans les réglages BetterDiscord, en clair : vous pouvez les effacer en vous déconnectant. Ne partagez jamais votre URL de retour. <a href="https://github.com/Eli0uce/ModsTab#spotify--votre-musique-là-où-vous-discutez">Voir le guide de connexion.</a></p></details><details><summary>Et si quelque chose ne fonctionne plus ?<span>+</span></summary><p>Une mise à jour de Discord peut affecter les plugins. Désactivez ModsTab depuis les paramètres BetterDiscord et consultez les <a href="https://github.com/Eli0uce/ModsTab/issues">issues GitHub</a>. Pour les installations, les erreurs et les limites connues, le README est votre point de départ.</p></details></div></section>
+  </main>
+  <footer class="footer wrap"><div class="footer-top"><a class="brand" href="#"><span class="brand-mark"><svg><use href="#i-mark"/></svg></span>ModsTab</a><p>Un petit onglet.<br>Un peu plus de liberté.</p><div><a href="https://github.com/Eli0uce/ModsTab">GitHub ↗</a><a href="https://github.com/Eli0uce/ModsTab/releases">Releases ↗</a><a href="https://github.com/Eli0uce/ModsTab/issues">Un souci ? ↗</a></div></div><div class="footer-bottom"><span>Créé par <a href="https://github.com/Eli0uce">Eli0uce</a> · Open source, licence MIT.</span><span>Non affilié à Discord, BetterDiscord ou Spotify.</span><a href="#main">Retour en haut ↑</a></div></footer>
+</body>
+</html>
