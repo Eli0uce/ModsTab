@@ -26,7 +26,15 @@ Les aperçus sont des illustrations, pas une connexion à Discord ou Spotify. Au
 
 ## Héberger
 
-Publiez le contenu du dossier sur un hébergeur statique. Aucun build requis. `netlify.toml` fournit la configuration et les en-têtes HTTP pour Netlify ; sa présence ne signifie pas que le site est déjà déployé.
+En ligne : **https://lab.studio-karasu.nc/ModsTab/** (VPS nginx, fichiers dans `/var/www/modstab`, bloc `location ^~ /ModsTab/` dans `lab.studio-karasu.nc.conf` avec les mêmes en-têtes de sécurité que `netlify.toml`).
+
+Mettre à jour :
+
+```bash
+rsync -az --delete index.html styles.css app.js favicon.svg LICENSE root@107.191.56.224:/var/www/modstab/
+```
+
+Publiez sinon le contenu du dossier sur n'importe quel hébergeur statique. Aucun build requis. `netlify.toml` fournit la configuration et les en-têtes HTTP pour Netlify.
 
 Les sources du site sont dans la branche **website** du dépôt ; le plugin et les workflows restent sur **main**. Pour une intégration Git Netlify, choisissez `website`, sans commande de build, avec `.` comme dossier à publier.
 
