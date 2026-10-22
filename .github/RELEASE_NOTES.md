@@ -1,12 +1,12 @@
 ## Votre Discord. Votre univers.
 
-**ModsTab 0.2.0** : créez vos propres thèmes et installez ModsTab avec des lanceurs natifs signés.
+**ModsTab 0.2.0** : créez vos propres thèmes et utilisez les nouveaux lanceurs natifs.
 
 - **Créer** : composez un thème Discord sans CSS, avec aperçu en direct, brouillon local et export direct vers BetterDiscord.
 - Les thèmes créés refusent les noms vides ou déjà utilisés et valident couleurs, polices et réglages avant export.
 - Le lecteur Spotify se positionne au-dessus du panneau utilisateur Discord et s’adapte à sa taille.
-- **Windows** : lanceur `.exe` signé Authenticode.
-- **macOS** : app universelle Intel/Apple Silicon, signée Developer ID et notariée.
+- **Windows** : lanceur natif `.exe` non signé (SmartScreen peut afficher un avertissement).
+- **macOS** : app universelle Intel/Apple Silicon, non signée et non notariée (Gatekeeper peut la bloquer).
 - Les archives ZIP historiques et le plugin `.js` autonome restent disponibles.
 
 - **Découvrir** : catalogue officiel BetterDiscord, plugins et thèmes, recherche, filtres, tri et fiches détaillées.
@@ -17,13 +17,13 @@
 
 ### Télécharger
 
-| Système | Archive | Lanceur |
+| Système | Livrable | Signature |
 |---|---|---|
-| Windows | `ModsTab-Setup.exe` | Lanceur signé |
-| macOS | `ModsTab-macOS.dmg` | App signée et notariée |
-| Les deux | `ModsTab.zip` | Lanceur de votre système |
+| Windows | `ModsTab-Setup.exe` | Non signé |
+| macOS | `ModsTab-macOS.dmg` | App non signée |
+| Les deux | `ModsTab.zip` | Scripts historiques non signés |
 
-Décompressez **toute l’archive** avant de lancer l’installation. Discord de bureau et Node.js sont requis ; le lanceur propose une installation de Node.js via winget (Windows) ou Homebrew si disponible (macOS). BetterDiscord est nécessaire ; l’installeur tente de l’installer s’il est absent. Il peut fermer et relancer Discord.
+Lancez l’installeur natif correspondant à votre système. Discord de bureau et Node.js sont requis ; le lanceur propose une installation de Node.js via winget (Windows) ou Homebrew si disponible (macOS). BetterDiscord est nécessaire ; l’installeur tente de l’installer s’il est absent. Il peut fermer et relancer Discord.
 
 BetterDiscord déjà installé ? Téléchargez `ModsTab.plugin.js` et placez-le dans votre dossier de plugins BetterDiscord.
 
@@ -33,4 +33,4 @@ Créez votre propre application dans le [dashboard Spotify](https://developer.sp
 
 Spotify doit être ouvert sur un appareil. Premium est nécessaire aux commandes de lecture ; l’accès à l’API dépend aussi des restrictions de votre application Spotify. Les jetons sont conservés en clair dans les réglages BetterDiscord.
 
-**Attention :** ModsTab n’est affilié ni à Discord, ni à BetterDiscord, ni à Spotify. Les modifications du client ne sont pas autorisées par les conditions de Discord. Les signatures concernent les lanceurs natifs ; le plugin JavaScript et les scripts contenus dans les archives ne sont pas des exécutables signés.
+**Attention :** ModsTab n’est affilié ni à Discord, ni à BetterDiscord, ni à Spotify. Les modifications du client ne sont pas autorisées par les conditions de Discord. Les lanceurs natifs ne sont ni signés ni notariés ; le plugin JavaScript et les scripts contenus dans les archives sont également non signés.

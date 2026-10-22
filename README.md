@@ -12,8 +12,8 @@ Le tout, directement dans Discord.
 [![Licence MIT](https://img.shields.io/badge/licence-MIT-a6a3ff?style=flat-square)](LICENSE)
 ![Plateformes](https://img.shields.io/badge/Windows%20%2B%20macOS-Discord%20desktop-32374d?style=flat-square)
 
-**[Télécharger pour Windows](https://github.com/Eli0uce/ModsTab/releases/latest/download/ModsTab-Windows.zip)** ·
-**[Télécharger pour macOS](https://github.com/Eli0uce/ModsTab/releases/latest/download/ModsTab-macOS.zip)** ·
+**[Télécharger pour Windows](https://github.com/Eli0uce/ModsTab/releases/latest/download/ModsTab-Setup.exe)** ·
+**[Télécharger pour macOS](https://github.com/Eli0uce/ModsTab/releases/latest/download/ModsTab-macOS.dmg)** ·
 [Signaler un problème](https://github.com/Eli0uce/ModsTab/issues)
 
 Gratuit. Open source. Sans compte ModsTab.
@@ -41,19 +41,19 @@ Le catalogue est paginé sans limite artificielle de résultats. Les installatio
 
 ### Windows
 
-1. [Téléchargez l’installeur Windows signé](https://github.com/Eli0uce/ModsTab/releases/latest/download/ModsTab-Setup.exe).
+1. [Téléchargez l’installeur Windows](https://github.com/Eli0uce/ModsTab/releases/latest/download/ModsTab-Setup.exe).
 2. Lancez `ModsTab-Setup.exe` et suivez les instructions affichées.
 3. Dans Discord, ouvrez **Paramètres utilisateur → Plugins** et activez **ModsTab**.
 
 ### macOS
 
-1. [Téléchargez l’app macOS signée et notariée](https://github.com/Eli0uce/ModsTab/releases/latest/download/ModsTab-macOS.dmg).
+1. [Téléchargez l’app macOS](https://github.com/Eli0uce/ModsTab/releases/latest/download/ModsTab-macOS.dmg).
 2. Ouvrez l’image disque et lancez `ModsTab.app` ; Terminal affiche le déroulement de l’installation.
 3. Dans Discord, ouvrez **Paramètres utilisateur → Plugins** et activez **ModsTab**.
 
 **Prérequis :** Discord de bureau, [Node.js](https://nodejs.org/) et BetterDiscord. Si Node.js manque, le lanceur Windows propose winget ; sur macOS, il utilise Homebrew s’il est disponible, sinon indique comment installer Node.js. Si BetterDiscord manque, l’installeur tente de l’installer avec son CLI : **Discord peut être fermé et relancé**. Des archives ZIP avec les lanceurs historiques restent disponibles dans les assets de la release.
 
-Les lanceurs natifs `.exe` et `.app` sont signés ; l’app macOS est également notariée. Le plugin `.js` et les scripts distribués dans les archives ZIP restent des fichiers source/script et ne sont pas des exécutables signés.
+Les lanceurs `.exe` et `.app` ne sont pas signés et l’app macOS n’est pas notariée. Windows peut afficher SmartScreen ; sur macOS, Gatekeeper peut bloquer l’app : ne l’ouvrez qu’après avoir vérifié qu’elle provient bien de la release officielle. Les archives ZIP historiques restent disponibles, mais leurs scripts ne sont pas signés non plus. Le plugin `.js` est un fichier source, pas un exécutable.
 
 ### BetterDiscord est déjà installé ?
 
@@ -133,7 +133,7 @@ npm run test:ui -- --workers=1
 
 `plugin/ModsTab.plugin.js` contient le plugin ; `installer/install.js` gère l’installation. `tests/catalog.test.js` couvre la logique du catalogue et les restrictions Spotify ; `tests/ui/` couvre les parcours, le lecteur principal, les erreurs et les petits écrans.
 
-Pour publier : vérifiez les tests, mettez à jour les versions et les notes dans `.github/RELEASE_NOTES.md`, puis poussez un nouveau tag `vX.Y.Z`. Le workflow signe l’installeur Windows avec Authenticode et signe/notarise l’app macOS. Configurez les secrets Actions `WINDOWS_SIGNING_CERTIFICATE_BASE64`, `WINDOWS_SIGNING_CERTIFICATE_PASSWORD`, `APPLE_CERTIFICATE_BASE64`, `APPLE_CERTIFICATE_PASSWORD`, `APPLE_ID`, `APPLE_APP_SPECIFIC_PASSWORD` et `APPLE_TEAM_ID` avant de pousser le tag. Il publie aussi les archives ZIP, le plugin seul et les empreintes SHA-256. Ne remplacez pas un tag déjà publié.
+Pour publier : vérifiez les tests, mettez à jour les versions et les notes dans `.github/RELEASE_NOTES.md`, puis poussez un nouveau tag `vX.Y.Z`. Le workflow produit les lanceurs natifs non signés, les archives ZIP, le plugin seul et leurs empreintes SHA-256. Ne remplacez pas un tag déjà publié.
 
 ## Contribuer
 
