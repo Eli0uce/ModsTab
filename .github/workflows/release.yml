@@ -51,28 +51,6 @@ jobs:
         with: { go-version: "1.22.x" }
       - name: Construire le lanceur Windows
         run: go build -trimpath -ldflags="-s -w" -o ModsTab-Setup.exe .
-      - name: Signer le lanceur Windows
-        env:
-          WINDOWS_SIGNING_CERTIFICATE_BASE64: ${{ secrets.WINDOWS_SIGNING_CERTIFICATE_BASE64 }}
-          WINDOWS_SIGNING_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_SIGNING_CERTIFICATE_PASSWORD }}
-        shell: pwsh
-        run: |
-          if (-not $env:WINDOWS_SIGNING_CERTIFICATE_BASE64 -or -not $env:WINDOWS_SIGNING_CERTIFICATE_PASSWORD) {
-            throw "Configurez les secrets WINDOWS_SIGNING_CERTIFICATE_BASE64 et WINDOWS_SIGNING_CERTIFICATE_PASSWORD avant de créer une release."
-          }
-          $certificate = Join-Path $env:RUNNER_TEMP "modstab-signing.pfx"
-          [IO.File]::WriteAllBytes($certificate, [Convert]::FromBase64String($env:WINDOWS_SIGNING_CERTIFICATE_BASE64))
-          $sdkBin = "${env:ProgramFiles(x86)}\Windows Kits\10\bin"
-          $signtool = Get-ChildItem $sdkBin -Filter signtool.exe -Recurse |
-            Where-Object { $_.FullName -match "\\x64\\signtool\.exe$" } |
-            Sort-Object FullName -Descending |
-            Select-Object -First 1 -ExpandProperty FullName
-          if (-not $signtool) { throw "SignTool est introuvable dans le SDK Windows." }
-          & $signtool sign /fd SHA256 /td SHA256 /tr "http://timestamp.digicert.com" /f $certificate /p $env:WINDOWS_SIGNING_CERTIFICATE_PASSWORD ModsTab-Setup.exe
-          if ($LASTEXITCODE -ne 0) { throw "La signature Authenticode a échoué." }
-          & $signtool verify /pa /v ModsTab-Setup.exe
-          if ($LASTEXITCODE -ne 0) { throw "La vérification Authenticode a échoué." }
-          Remove-Item $certificate -Force
       - uses: actions/upload-artifact@v7
         with:
           name: windows-installer
@@ -86,7 +64,7 @@ jobs:
       - uses: actions/checkout@v7
       - uses: actions/setup-go@v7
         with: { go-version: "1.22.x" }
-      - name: Construire l’app universelle
+      - name: Construire l’app universelle non signée
         run: |
           GOOS=darwin GOARCH=arm64 go build -trimpath -ldflags="-s -w" -o "$RUNNER_TEMP/ModsTab-arm64" .
           GOOS=darwin GOARCH=amd64 go build -trimpath -ldflags="-s -w" -o "$RUNNER_TEMP/ModsTab-amd64" .
@@ -107,41 +85,7 @@ jobs:
           </dict>
           </plist>
           PLIST
-      - name: Signer et notariser l’app macOS
-        env:
-          APPLE_CERTIFICATE_BASE64: ${{ secrets.APPLE_CERTIFICATE_BASE64 }}
-          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-        run: |
-          if [ -z "$APPLE_CERTIFICATE_BASE64" ] || [ -z "$APPLE_CERTIFICATE_PASSWORD" ] ||
-             [ -z "$APPLE_ID" ] || [ -z "$APPLE_APP_SPECIFIC_PASSWORD" ] || [ -z "$APPLE_TEAM_ID" ]; then
-            echo "Configurez les secrets Apple de signature et notarisation avant de créer une release." >&2
-            exit 1
-          fi
-          certificate="$RUNNER_TEMP/modstab-signing.p12"
-          keychain="$RUNNER_TEMP/modstab-signing.keychain-db"
-          keychain_password="$(openssl rand -hex 24)"
-          printf '%s' "$APPLE_CERTIFICATE_BASE64" | base64 --decode > "$certificate"
-          security create-keychain -p "$keychain_password" "$keychain"
-          security set-keychain-settings -lut 21600 "$keychain"
-          security unlock-keychain -p "$keychain_password" "$keychain"
-          security import "$certificate" -k "$keychain" -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign -T /usr/bin/security
-          security list-keychains -d user -s "$keychain"
-          identity="$(security find-identity -v -p codesigning "$keychain" | awk -F '"' '/Developer ID Application/ { print $2; exit }')"
-          if [ -z "$identity" ]; then
-            echo "Le certificat importé doit être un certificat Developer ID Application." >&2
-            exit 1
-          fi
-          codesign --force --options runtime --timestamp --sign "$identity" ModsTab.app
-          codesign --verify --deep --strict --verbose=2 ModsTab.app
           hdiutil create -volname ModsTab -srcfolder ModsTab.app -ov -format UDZO ModsTab-macOS.dmg
-          xcrun notarytool submit ModsTab-macOS.dmg --apple-id "$APPLE_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --team-id "$APPLE_TEAM_ID" --wait
-          xcrun stapler staple ModsTab-macOS.dmg
-          xcrun stapler validate ModsTab-macOS.dmg
-          rm -f "$certificate"
-          security delete-keychain "$keychain"
       - uses: actions/upload-artifact@v7
         with:
           name: macos-installer
